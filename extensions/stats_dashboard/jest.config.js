@@ -11,4 +11,7 @@ module.exports = {
     '!**/node_modules/**',
     '!**/*.d.ts',
   ],
+  transformIgnorePatterns: [
+    'node_modules/(?!uuid)',
+  ],
 };
