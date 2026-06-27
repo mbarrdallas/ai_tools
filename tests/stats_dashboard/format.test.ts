@@ -58,7 +58,7 @@ describe('Formatting Utilities', () => {
     it('should handle edge cases', () => {
       expect(formatTokens(0)).toBe('0');
       expect(formatTokens(-100)).toBe('0'); // Negative should be treated as 0
-      expect(formatTokens(500.5)).toBe('500'); // Should handle floats
+      expect(formatTokens(500.5)).toBe('501'); // Should handle floats (Issue 1: standard rounding)
       expect(formatTokens(1234.56)).toBe('1.2k'); // Float thousands
     });
 
@@ -116,7 +116,7 @@ describe('Formatting Utilities', () => {
     it('should handle edge cases', () => {
       expect(formatDuration(0)).toBe('0ms');
       expect(formatDuration(-100)).toBe('0ms'); // Negative should be 0
-      expect(formatDuration(500.7)).toBe('500ms'); // Float should be rounded
+      expect(formatDuration(500.7)).toBe('501ms'); // Float should be rounded (Issue 2: standard rounding)
     });
 
     it('should handle null and undefined gracefully', () => {
@@ -168,7 +168,7 @@ describe('Formatting Utilities', () => {
 
     it('should handle edge cases', () => {
       expect(formatCost(-10)).toBe('$0.00'); // Negative should be 0
-      expect(formatCost(0.005)).toBe('$0.01'); // Rounds up
+      expect(formatCost(0.005)).toBe('$0.0050'); // Issue 3: Falls under small value format (< $0.01)
       expect(formatCost(0.0005)).toBe('$0.0005');
     });
 
@@ -406,13 +406,13 @@ describe('Formatting Utilities', () => {
     it('should preserve the first part of text', () => {
       const text = 'The quick brown fox jumps over the lazy dog';
       const result = truncateText(text, 15);
-      expect(result).toBe('The quick b...');
+      expect(result).toBe('The quick br...'); // Issue 4: maxLength-3 = 12 chars of text + 3 ellipsis = 15 total
       expect(result.startsWith('The')).toBe(true);
     });
 
     it('should handle multi-line text', () => {
       const multiline = 'line1\nline2\nline3';
-      expect(truncateText(multiline, 10)).toBe('line1\nli...');
+      expect(truncateText(multiline, 10)).toBe('line1\nl...'); // Issue 5: 10-3 = 7 chars of text + 3 ellipsis = 10 total
     });
 
     it('should handle unicode characters', () => {

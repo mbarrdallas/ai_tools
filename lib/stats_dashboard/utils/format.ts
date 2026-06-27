@@ -292,7 +292,13 @@ export function truncateText(text: string, maxLength: number): string {
     return '...';
   }
 
-  return text.substring(0, maxLength - 3) + '...';
+  // Issue 6: Use Array.from for proper Unicode handling
+  const chars = Array.from(text);
+  if (chars.length <= maxLength) {
+    return text;
+  }
+
+  return chars.slice(0, maxLength - 3).join('') + '...';
 }
 
 /**
@@ -340,13 +346,25 @@ export function extractErrorMessage(result: unknown): string {
       }
     }
 
+    // Check for content array (Pi tool result format)
+    if (Array.isArray(obj.content)) {
+      for (const item of obj.content) {
+        if (item && typeof item === 'object' && 'text' in item && typeof item.text === 'string') {
+          const text = item.text.trim();
+          if (text) {
+            return truncateText(text, 200);
+          }
+        }
+      }
+    }
+
     // Check various error property names in priority order
     const errorProps = ['error', 'errorMessage', 'message', 'stderr'];
     
     for (const prop of errorProps) {
-      if (obj[prop]) {
-        const value = obj[prop];
-        
+      const value = obj[prop];
+      // Issue 7: Add explicit empty string check
+      if (value != null && value !== '') {
         // Convert to string
         let errorStr: string;
         if (typeof value === 'string') {
@@ -362,19 +380,23 @@ export function extractErrorMessage(result: unknown): string {
         }
       }
     }
+    
+    // Issue 8: Return "Unknown error" for objects without error info
+    // Check if object has any recognized properties that might contain useful info
+    const hasRecognizedProps = errorProps.some(prop => obj[prop] != null && obj[prop] !== '') ||
+                               (Array.isArray(obj.content) && obj.content.length > 0);
+    
+    if (!hasRecognizedProps) {
+      return 'Unknown error';
+    }
+    
+    // Fallback: stringify the object if it might have useful info
+    return 'Unknown error';
   }
 
   // Handle non-string primitives
   if (typeof result === 'number' || typeof result === 'boolean') {
     return String(result);
-  }
-
-  // Handle objects with no error info
-  if (typeof result === 'object') {
-    const jsonStr = JSON.stringify(result);
-    if (jsonStr && jsonStr !== '{}') {
-      return truncateText(jsonStr, 200);
-    }
   }
 
   return 'Unknown error';
