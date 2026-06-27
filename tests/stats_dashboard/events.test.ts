@@ -74,8 +74,8 @@ const mockPiContext = {
 // Mock dashboard handle
 let mockDashboardHandle: any = null;
 
-// Event handlers module (to be implemented)
-import type {
+// Event handlers module
+import {
   handleAgentStart,
   handleAgentEnd,
   handleMessageEnd,
@@ -86,6 +86,7 @@ import type {
   handleSessionStart,
   handleSessionShutdown,
   registerEventHandlers,
+  setManagers,
 } from '@lib/stats_dashboard/handlers/events';
 
 describe('Event Handlers', () => {
@@ -103,6 +104,9 @@ describe('Event Handlers', () => {
       requestRender: jest.fn(),
       close: jest.fn(),
     };
+
+    // Setup managers for handlers
+    setManagers(mockStateManager as any, mockNotificationManager as any);
 
     // Setup default mock returns
     mockStateManager.createAgent.mockReturnValue('new-agent-id');
@@ -138,7 +142,7 @@ describe('Event Handlers', () => {
       const event = {};
       
       // Act
-      // await handleAgentStart(event, mockPiContext);
+      await handleAgentStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.createAgent).toHaveBeenCalledWith('main', undefined);
@@ -171,7 +175,7 @@ describe('Event Handlers', () => {
       const event = {};
       
       // Act
-      // await handleAgentStart(event, mockPiContext);
+      await handleAgentStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.createAgent).not.toHaveBeenCalled();
@@ -183,10 +187,10 @@ describe('Event Handlers', () => {
       const event = {};
       
       // Act
-      // const agentId = await handleAgentStart(event, mockPiContext);
+      const agentId = await handleAgentStart(event, mockPiContext);
       
       // Assert
-      // expect(agentId).toBe('root-123');
+      expect(agentId).toBe('root-123');
     });
 
     it('should handle event without data gracefully', async () => {
@@ -209,7 +213,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleAgentEnd(event, mockPiContext, currentAgentId);
+      await handleAgentEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.completeAgent).toHaveBeenCalledWith(
@@ -231,7 +235,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleAgentEnd(event, mockPiContext, currentAgentId);
+      await handleAgentEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.completeAgent).toHaveBeenCalledWith(
@@ -270,7 +274,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).not.toHaveBeenCalled();
@@ -293,7 +297,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -321,7 +325,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -349,7 +353,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -377,7 +381,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -405,7 +409,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -433,7 +437,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -461,7 +465,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -494,7 +498,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockNotificationManager.checkContextThreshold).toHaveBeenCalledWith(currentAgentId);
@@ -517,7 +521,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId, mockDashboardHandle);
+      await handleMessageEnd(event, mockPiContext, currentAgentId, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.requestRender).toHaveBeenCalled();
@@ -553,7 +557,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).not.toHaveBeenCalled();
@@ -595,7 +599,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -617,7 +621,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleTurnStart(event, mockPiContext, currentAgentId);
+      await handleTurnStart(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.incrementTurnCount).toHaveBeenCalledWith(currentAgentId);
@@ -630,9 +634,9 @@ describe('Event Handlers', () => {
       const event3 = { turnIndex: 2, timestamp: Date.now() + 2000 };
       
       // Act
-      // await handleTurnStart(event1, mockPiContext, currentAgentId);
-      // await handleTurnStart(event2, mockPiContext, currentAgentId);
-      // await handleTurnStart(event3, mockPiContext, currentAgentId);
+      await handleTurnStart(event1, mockPiContext, currentAgentId);
+      await handleTurnStart(event2, mockPiContext, currentAgentId);
+      await handleTurnStart(event3, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.incrementTurnCount).toHaveBeenCalledTimes(3);
@@ -661,7 +665,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleTurnEnd(event, mockPiContext, currentAgentId);
+      await handleTurnEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.addConversationEntry).toHaveBeenCalledWith(
@@ -684,7 +688,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleTurnEnd(event, mockPiContext, currentAgentId);
+      await handleTurnEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.addConversationEntry).toHaveBeenCalledWith(
@@ -708,7 +712,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleTurnEnd(event, mockPiContext, currentAgentId);
+      await handleTurnEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.addConversationEntry).toHaveBeenCalledWith(
@@ -731,7 +735,7 @@ describe('Event Handlers', () => {
       
       // Act
       const beforeCall = Date.now();
-      // await handleTurnEnd(event, mockPiContext, currentAgentId);
+      await handleTurnEnd(event, mockPiContext, currentAgentId);
       const afterCall = Date.now();
       
       // Assert
@@ -754,7 +758,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleTurnEnd(event, mockPiContext, currentAgentId, mockDashboardHandle);
+      await handleTurnEnd(event, mockPiContext, currentAgentId, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.requestRender).toHaveBeenCalled();
@@ -781,7 +785,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.addToolCall).toHaveBeenCalledWith(
@@ -803,7 +807,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.addToolCall).toHaveBeenCalledWith(
@@ -824,7 +828,7 @@ describe('Event Handlers', () => {
       
       // Act
       const beforeCall = Date.now();
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       const afterCall = Date.now();
       
       // Assert
@@ -849,7 +853,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.createAgent).toHaveBeenCalledWith('researcher', currentAgentId);
@@ -869,7 +873,7 @@ describe('Event Handlers', () => {
       const mapping = new Map<string, string>();
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, mapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, mapping);
       
       // Assert
       expect(mapping.get('tool-123')).toBe('subagent-456');
@@ -884,7 +888,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       // createAgent should only be called for subagent tool
@@ -900,7 +904,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping, mockDashboardHandle);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.requestRender).toHaveBeenCalled();
@@ -921,7 +925,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.addToolCall).toHaveBeenCalledWith(
@@ -985,7 +989,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.completeToolCall).toHaveBeenCalledWith(
@@ -1010,7 +1014,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.completeToolCall).toHaveBeenCalledWith(
@@ -1035,7 +1039,7 @@ describe('Event Handlers', () => {
       
       // Act
       const beforeCall = Date.now();
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       const afterCall = Date.now();
       
       // Assert
@@ -1062,7 +1066,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.completeToolCall).toHaveBeenCalledWith(
@@ -1085,7 +1089,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.completeToolCall).toHaveBeenCalledWith(
@@ -1111,7 +1115,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockNotificationManager.notifyToolFailure).toHaveBeenCalledWith(
@@ -1133,7 +1137,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockNotificationManager.notifyToolFailure).not.toHaveBeenCalled();
@@ -1152,7 +1156,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.completeAgent).toHaveBeenCalledWith(
@@ -1175,7 +1179,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.completeAgent).toHaveBeenCalledWith(
@@ -1197,7 +1201,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, mapping);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, mapping);
       
       // Assert
       expect(mapping.has('tool-123')).toBe(false);
@@ -1215,7 +1219,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping, mockDashboardHandle);
+      await handleToolExecutionEnd(event, mockPiContext, currentAgentId, subagentMapping, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.requestRender).toHaveBeenCalled();
@@ -1245,7 +1249,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionStart(event, mockPiContext);
+      await handleSessionStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.reset).toHaveBeenCalled();
@@ -1258,7 +1262,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionStart(event, mockPiContext);
+      await handleSessionStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.reset).toHaveBeenCalled();
@@ -1271,7 +1275,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionStart(event, mockPiContext);
+      await handleSessionStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.reset).not.toHaveBeenCalled();
@@ -1284,7 +1288,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionStart(event, mockPiContext);
+      await handleSessionStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.reset).not.toHaveBeenCalled();
@@ -1297,7 +1301,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionStart(event, mockPiContext);
+      await handleSessionStart(event, mockPiContext);
       
       // Assert
       expect(mockStateManager.reset).not.toHaveBeenCalled();
@@ -1316,10 +1320,10 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // const contextLimit = await handleSessionStart(event, ctx);
+      const contextLimit = await handleSessionStart(event, ctx);
       
       // Assert
-      // expect(contextLimit).toBe(200000);
+      expect(contextLimit).toBe(200000);
     });
 
     it('should use default context limit if model info missing', async () => {
@@ -1333,10 +1337,10 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // const contextLimit = await handleSessionStart(event, ctx);
+      const contextLimit = await handleSessionStart(event, ctx);
       
       // Assert
-      // expect(contextLimit).toBeGreaterThan(0);
+      expect(contextLimit).toBeGreaterThan(0);
     });
 
     it('should handle event without reason gracefully', async () => {
@@ -1356,7 +1360,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
+      await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.close).toHaveBeenCalled();
@@ -1379,7 +1383,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
+      await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.close).toHaveBeenCalled();
@@ -1392,7 +1396,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
+      await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
       
       // Assert
       expect(mockDashboardHandle.close).toHaveBeenCalled();
@@ -1405,10 +1409,10 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // const handle = await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
+      const handle = await handleSessionShutdown(event, mockPiContext, mockDashboardHandle);
       
       // Assert
-      // expect(handle).toBeNull();
+      expect(handle).toBeNull();
     });
   });
 
@@ -1420,7 +1424,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // registerEventHandlers(mockPi, mockStateManager, mockNotificationManager);
+      registerEventHandlers(mockPi, mockStateManager as any, mockNotificationManager as any);
       
       // Assert
       expect(mockPi.on).toHaveBeenCalledWith('agent_start', expect.any(Function));
@@ -1441,7 +1445,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // registerEventHandlers(mockPi, mockStateManager, mockNotificationManager);
+      registerEventHandlers(mockPi, mockStateManager as any, mockNotificationManager as any);
       
       // Assert
       expect(mockPi.on).toHaveBeenCalledTimes(9);
@@ -1454,7 +1458,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // registerEventHandlers(mockPi, mockStateManager, mockNotificationManager);
+      registerEventHandlers(mockPi, mockStateManager as any, mockNotificationManager as any);
       
       // Handlers should have closure access to stateManager
       // This is implicitly tested through other tests
@@ -1467,7 +1471,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // registerEventHandlers(mockPi, mockStateManager, mockNotificationManager);
+      registerEventHandlers(mockPi, mockStateManager as any, mockNotificationManager as any);
       
       // Handlers should have closure access to notificationManager
       // This is implicitly tested through other tests
@@ -1481,36 +1485,36 @@ describe('Event Handlers', () => {
       
       // Act
       // Agent starts
-      // await handleAgentStart({}, mockPiContext);
+      await handleAgentStart({}, mockPiContext);
       
       // Turn starts
-      // await handleTurnStart({ turnIndex: 0, timestamp: Date.now() }, mockPiContext, 'agent-123');
+      await handleTurnStart({ turnIndex: 0, timestamp: Date.now() }, mockPiContext, 'agent-123');
       
       // Message ends with metrics
-      // await handleMessageEnd({
-      //   message: {
-      //     role: 'assistant',
-      //     usage: {
-      //       input: 500,
-      //       output: 200,
-      //       cacheRead: 0,
-      //       cacheWrite: 0,
-      //       totalTokens: 700,
-      //       cost: { total: 0.005 },
-      //     },
-      //   },
-      // }, mockPiContext, 'agent-123');
+      await handleMessageEnd({
+        message: {
+          role: 'assistant',
+          usage: {
+            input: 500,
+            output: 200,
+            cacheRead: 0,
+            cacheWrite: 0,
+            totalTokens: 700,
+            cost: { total: 0.005 },
+          },
+        },
+      }, mockPiContext, 'agent-123');
       
       // Turn ends
-      // await handleTurnEnd({
-      //   turnIndex: 0,
-      //   message: { role: 'user', content: 'test' },
-      // }, mockPiContext, 'agent-123');
+      await handleTurnEnd({
+        turnIndex: 0,
+        message: { role: 'user', content: 'test' },
+      }, mockPiContext, 'agent-123');
       
       // Agent ends
-      // await handleAgentEnd({
-      //   messages: [{ role: 'assistant', content: 'done' }],
-      // }, mockPiContext, 'agent-123');
+      await handleAgentEnd({
+        messages: [{ role: 'assistant', content: 'done' }],
+      }, mockPiContext, 'agent-123');
       
       // Assert
       expect(mockStateManager.createAgent).toHaveBeenCalled();
@@ -1527,21 +1531,21 @@ describe('Event Handlers', () => {
       
       // Act
       // Tool starts
-      // await handleToolExecutionStart({
-      //   toolCallId,
-      //   toolName: 'bash',
-      //   args: { command: 'echo test' },
-      // }, mockPiContext, agentId, subagentMapping);
+      await handleToolExecutionStart({
+        toolCallId,
+        toolName: 'bash',
+        args: { command: 'echo test' },
+      }, mockPiContext, agentId, subagentMapping);
       
       // Tool ends
-      // await handleToolExecutionEnd({
-      //   toolCallId,
-      //   toolName: 'bash',
-      //   result: {
-      //     content: [{ type: 'text', text: 'test' }],
-      //   },
-      //   isError: false,
-      // }, mockPiContext, agentId, subagentMapping);
+      await handleToolExecutionEnd({
+        toolCallId,
+        toolName: 'bash',
+        result: {
+          content: [{ type: 'text', text: 'test' }],
+        },
+        isError: false,
+      }, mockPiContext, agentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.addToolCall).toHaveBeenCalledWith(
@@ -1568,24 +1572,24 @@ describe('Event Handlers', () => {
       
       // Act
       // Parent starts subagent tool
-      // await handleToolExecutionStart({
-      //   toolCallId,
-      //   toolName: 'subagent',
-      //   args: {
-      //     agent: 'researcher',
-      //     task: 'Research topic',
-      //   },
-      // }, mockPiContext, parentId, mapping);
+      await handleToolExecutionStart({
+        toolCallId,
+        toolName: 'subagent',
+        args: {
+          agent: 'researcher',
+          task: 'Research topic',
+        },
+      }, mockPiContext, parentId, mapping);
       
       // Subagent completes
-      // await handleToolExecutionEnd({
-      //   toolCallId,
-      //   toolName: 'subagent',
-      //   result: {
-      //     content: [{ type: 'text', text: 'Research complete' }],
-      //   },
-      //   isError: false,
-      // }, mockPiContext, parentId, mapping);
+      await handleToolExecutionEnd({
+        toolCallId,
+        toolName: 'subagent',
+        result: {
+          content: [{ type: 'text', text: 'Research complete' }],
+        },
+        isError: false,
+      }, mockPiContext, parentId, mapping);
       
       // Assert
       expect(mockStateManager.createAgent).toHaveBeenCalledWith('researcher', parentId);
@@ -1621,7 +1625,7 @@ describe('Event Handlers', () => {
       
       // Act
       for (const event of events) {
-        // await handleTurnStart(event, mockPiContext, currentAgentId);
+        await handleTurnStart(event, mockPiContext, currentAgentId);
       }
       
       // Assert
@@ -1664,7 +1668,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleMessageEnd(event, mockPiContext, currentAgentId);
+      await handleMessageEnd(event, mockPiContext, currentAgentId);
       
       // Assert
       expect(mockStateManager.updateMetrics).toHaveBeenCalledWith(
@@ -1684,7 +1688,7 @@ describe('Event Handlers', () => {
       };
       
       // Act
-      // await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
+      await handleToolExecutionStart(event, mockPiContext, currentAgentId, subagentMapping);
       
       // Assert
       expect(mockStateManager.addToolCall).toHaveBeenCalledWith(
@@ -1718,14 +1722,14 @@ describe('Event Handlers', () => {
       
       // Act
       // await Promise.all([
-      //   handleTurnStart({ turnIndex: 0, timestamp: Date.now() }, mockPiContext, agent1),
-      //   handleTurnStart({ turnIndex: 0, timestamp: Date.now() }, mockPiContext, agent2),
-      //   handleMessageEnd({
-      //     message: { role: 'assistant', usage: { input: 100, output: 50, cacheRead: 0, cacheWrite: 0, totalTokens: 150, cost: { total: 0.001 } } },
-      //   }, mockPiContext, agent1),
-      //   handleMessageEnd({
-      //     message: { role: 'assistant', usage: { input: 200, output: 100, cacheRead: 0, cacheWrite: 0, totalTokens: 300, cost: { total: 0.002 } } },
-      //   }, mockPiContext, agent2),
+        handleTurnStart({ turnIndex: 0, timestamp: Date.now() }, mockPiContext, agent1),
+        handleTurnStart({ turnIndex: 0, timestamp: Date.now() }, mockPiContext, agent2),
+        handleMessageEnd({
+          message: { role: 'assistant', usage: { input: 100, output: 50, cacheRead: 0, cacheWrite: 0, totalTokens: 150, cost: { total: 0.001 } } },
+        }, mockPiContext, agent1),
+        handleMessageEnd({
+          message: { role: 'assistant', usage: { input: 200, output: 100, cacheRead: 0, cacheWrite: 0, totalTokens: 300, cost: { total: 0.002 } } },
+        }, mockPiContext, agent2),
       // ]);
       
       // Assert
