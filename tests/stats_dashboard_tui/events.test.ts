@@ -35,7 +35,7 @@ import type {
   AgentMetrics,
   ToolCall,
   ConversationEntry,
-} from '@lib/stats_dashboard/types';
+} from '@lib/stats_dashboard_tui/types';
 
 // Mock StateManager and NotificationManager
 const mockStateManager = {
@@ -87,7 +87,7 @@ import {
   handleSessionShutdown,
   registerEventHandlers,
   setManagers,
-} from '@lib/stats_dashboard/handlers/events';
+} from '@lib/stats_dashboard_tui/handlers/events';
 
 describe('Event Handlers', () => {
   let currentAgentId: string;

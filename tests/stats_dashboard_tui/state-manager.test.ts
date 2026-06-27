@@ -32,11 +32,11 @@ import type {
   ToolCallStatus,
   ConversationEntry,
   MessageRole,
-} from '@lib/stats_dashboard/types';
+} from '@lib/stats_dashboard_tui/types';
 
 // The StateManager implementation to be tested
 // This will be implemented by the Coder Agent
-import { StateManager } from '@lib/stats_dashboard/state/state-manager';
+import { StateManager } from '@lib/stats_dashboard_tui/state/state-manager';
 
 describe('StateManager', () => {
   let stateManager: StateManager;
