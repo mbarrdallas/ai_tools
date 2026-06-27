@@ -254,6 +254,34 @@ describe('DashboardComponent', () => {
       expect(onCloseMock).not.toHaveBeenCalled();
     });
 
+    it('should not trigger onClose on arrow keys', () => {
+      const dashboard = new DashboardComponent({
+        stateManager: mockStateManager,
+        controller: mockController,
+        onClose: onCloseMock,
+      });
+
+      // Arrow keys should not close dashboard
+      dashboard.handleInput('\x1b[A'); // Up arrow
+      dashboard.handleInput('\x1b[B'); // Down arrow
+      dashboard.handleInput('\x1b[C'); // Right arrow
+      dashboard.handleInput('\x1b[D'); // Left arrow
+
+      expect(onCloseMock).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger onClose on Tab key', () => {
+      const dashboard = new DashboardComponent({
+        stateManager: mockStateManager,
+        controller: mockController,
+        onClose: onCloseMock,
+      });
+
+      dashboard.handleInput('\x1b[Z'); // Tab (Shift+Tab) sequence
+
+      expect(onCloseMock).not.toHaveBeenCalled();
+    });
+
     it('should handle empty input', () => {
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
@@ -264,6 +292,7 @@ describe('DashboardComponent', () => {
       expect(() => {
         dashboard.handleInput('');
       }).not.toThrow();
+      expect(onCloseMock).not.toHaveBeenCalled();
     });
 
     it('should handle null or undefined input gracefully', () => {
@@ -553,6 +582,17 @@ describe('DashboardComponent', () => {
 
       // Should have made additional call after invalidate
       expect(secondCallCount).toBeGreaterThan(firstCallCount);
+    });
+  });
+
+  describe('Overlay Configuration', () => {
+    it('should export DASHBOARD_OVERLAY_CONFIG', () => {
+      const { DASHBOARD_OVERLAY_CONFIG } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      
+      expect(DASHBOARD_OVERLAY_CONFIG).toBeDefined();
+      expect(DASHBOARD_OVERLAY_CONFIG.anchor).toBe('right-center');
+      expect(DASHBOARD_OVERLAY_CONFIG.widthPercent).toBe(50);
+      expect(DASHBOARD_OVERLAY_CONFIG.heightPercent).toBe(80);
     });
   });
 

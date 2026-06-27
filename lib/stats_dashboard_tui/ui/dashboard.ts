@@ -10,6 +10,16 @@ import type { StateManager } from '../state/state-manager';
 import type { Agent, DashboardState } from '../types';
 
 /**
+ * Overlay configuration for dashboard positioning
+ * Used when rendering via ctx.ui.custom({ overlay: true, ... })
+ */
+export const DASHBOARD_OVERLAY_CONFIG = {
+  anchor: 'right-center',
+  widthPercent: 50,
+  heightPercent: 80,
+} as const;
+
+/**
  * Props for DashboardComponent constructor
  */
 interface DashboardComponentProps {
@@ -150,8 +160,9 @@ export class DashboardComponent implements Component {
       return;
     }
 
-    // Check for Escape key (ESC = 0x1b = \x1b = \u001b)
-    if (data === '\x1b' || data === '\u001b' || data.startsWith('\x1b[')) {
+    // Check for bare Escape key (ESC = 0x1b = \x1b = \u001b)
+    // Note: Arrow keys like \x1b[A should NOT close the dashboard
+    if (data === '\x1b' || data === '\u001b') {
       if (this.onClose) {
         this.onClose();
       }
