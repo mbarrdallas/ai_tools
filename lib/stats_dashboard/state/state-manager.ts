@@ -14,6 +14,7 @@ import type {
   AgentMetrics,
   ToolCall,
   ConversationEntry,
+  DashboardState,
 } from '../types';
 
 /**
@@ -298,5 +299,14 @@ export class StateManager {
    */
   reset(): void {
     this.store.reset();
+  }
+
+  /**
+   * Get the current dashboard state
+   * 
+   * @returns Dashboard state or null if not available
+   */
+  getDashboardState(): DashboardState | null {
+    return this.store.getDashboardState();
   }
 }

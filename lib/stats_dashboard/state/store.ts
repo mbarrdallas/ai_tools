@@ -9,6 +9,7 @@ import type {
   Agent,
   AgentStatus,
   ToolCall,
+  DashboardState,
 } from '../types';
 
 /**
@@ -27,6 +28,9 @@ export class DataStore {
   
   /** Index: tool call ID -> { agentId, toolCall } for pending tool calls */
   private pendingToolCalls: Map<string, { agentId: string; toolCall: ToolCall }>;
+  
+  /** Dashboard UI state */
+  private dashboardState: DashboardState;
 
   constructor() {
     this.agents = new Map();
@@ -37,6 +41,11 @@ export class DataStore {
     ]);
     this.subagentsByParent = new Map();
     this.pendingToolCalls = new Map();
+    this.dashboardState = {
+      isVisible: false,
+      selectedAgentId: null,
+      expandedSections: new Set<string>(),
+    };
   }
 
   /**
@@ -188,6 +197,25 @@ export class DataStore {
     
     this.subagentsByParent.clear();
     this.pendingToolCalls.clear();
+    this.dashboardState = {
+      isVisible: false,
+      selectedAgentId: null,
+      expandedSections: new Set<string>(),
+    };
+  }
+
+  /**
+   * Get the current dashboard state
+   */
+  getDashboardState(): DashboardState {
+    return this.dashboardState;
+  }
+
+  /**
+   * Update dashboard state
+   */
+  updateDashboardState(updates: Partial<DashboardState>): void {
+    Object.assign(this.dashboardState, updates);
   }
 
   // Test helper methods to verify internal state
