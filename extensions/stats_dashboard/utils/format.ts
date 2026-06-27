@@ -139,11 +139,6 @@ export function formatToolArgs(toolName: string, args: Record<string, unknown>):
     return '(no args)';
   }
 
-  // Handle empty args
-  if (Object.keys(args).length === 0) {
-    return '(no args)';
-  }
-
   // Format based on tool type
   switch (toolName) {
     case 'bash': {
