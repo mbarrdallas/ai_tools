@@ -207,6 +207,12 @@ export async function handleAgentStart(
       // Use existing root agent
       currentAgentId = rootAgent.id;
     }
+
+    // Trigger dashboard re-render so new agent appears immediately
+    if (dashboardHandle) {
+      dashboardHandle.requestRender();
+    }
+
     return currentAgentId;
   } catch (error) {
     console.error('Error in handleAgentStart:', error);
@@ -237,6 +243,11 @@ export async function handleAgentEnd(
     // Complete the agent with appropriate status
     const status = hasError ? 'failed' : 'completed';
     stateManager.completeAgent(agentId, status);
+
+    // Trigger dashboard re-render so status updates immediately
+    if (dashboardHandle) {
+      dashboardHandle.requestRender();
+    }
   } catch (error) {
     console.error('Error in handleAgentEnd:', error);
   }
