@@ -33,6 +33,22 @@ describe('MetricsDisplay Component', () => {
     bg: jest.fn((style: string, text: string) => `[bg:${style}]${text}[/bg:${style}]`),
   };
 
+  // Helper function to create mock agent with given metrics
+  function createMockAgent(metrics: AgentMetrics): import('@lib/stats_dashboard_tui/types').Agent {
+    return {
+      id: 'agent-' + Math.random().toString(36).substring(7),
+      name: 'test-agent',
+      status: 'running',
+      parentId: null,
+      startTime: Date.now(),
+      endTime: null,
+      metrics,
+      toolCalls: [],
+      messageCount: 0,
+      subagentIds: [],
+    };
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -50,7 +66,7 @@ describe('MetricsDisplay Component', () => {
         turnCount: 3,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
 
       expect(display).toBeDefined();
       expect(display).toBeInstanceOf(MetricsDisplay);
@@ -68,7 +84,7 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, null as any);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: null, width: 80 });
 
       expect(display).toBeDefined();
     });
@@ -85,7 +101,7 @@ describe('MetricsDisplay Component', () => {
         turnCount: 0,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
 
       expect(display).toBeDefined();
     });
@@ -104,8 +120,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Input');
       expect(rendered).toContain('15.4k'); // Formatted tokens
@@ -123,8 +139,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Output');
       expect(rendered).toContain('2.3k');
@@ -142,8 +158,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Cache Read');
       expect(rendered).toContain('3.2k');
@@ -161,8 +177,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Cache Write');
       expect(rendered).toContain('1.5k');
@@ -180,8 +196,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 0,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('0');
     });
@@ -198,8 +214,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 10,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('1.5M');
       expect(rendered).toContain('2.3M');
@@ -219,8 +235,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Cost');
       expect(rendered).toContain('$1.23');
@@ -238,8 +254,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('$0.0012');
     });
@@ -256,8 +272,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 50,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('$1,234.56');
     });
@@ -274,8 +290,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 0,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('$0.00');
     });
@@ -294,8 +310,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Context');
       expect(rendered).toMatch(/\[.*\]|█|▓|▒|░/); // Progress bar characters
@@ -313,8 +329,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('50%'); // 5000 / 10000
     });
@@ -331,8 +347,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('7.5k');
       expect(rendered).toContain('10.0k');
@@ -350,8 +366,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should call theme.fg with 'warning' or 'error' style
       expect(mockTheme.fg).toHaveBeenCalledWith(
@@ -373,8 +389,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      display.render();
 
       expect(mockTheme.fg).toHaveBeenCalledWith(
         expect.stringMatching(/warning|error|danger/),
@@ -394,8 +410,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      display.render();
 
       expect(mockTheme.fg).toHaveBeenCalledWith(
         expect.stringMatching(/warning|error|danger/),
@@ -415,8 +431,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      display.render();
 
       // Should NOT be called with warning style for context display
       const warningCalls = (mockTheme.fg as jest.MockedFunction<any>).mock.calls.filter(
@@ -437,8 +453,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('100%');
       expect(mockTheme.fg).toHaveBeenCalledWith(
@@ -459,8 +475,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should cap at 100% or show overflow
       expect(rendered).toMatch(/100%|120%/);
@@ -478,8 +494,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should show N/A or handle division by zero
       expect(rendered).toMatch(/N\/A|Unknown|0%/);
@@ -497,8 +513,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 0,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('0%');
     });
@@ -517,8 +533,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 3,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('Turn');
       expect(rendered).toContain('3');
@@ -536,8 +552,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 0,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('0');
     });
@@ -554,8 +570,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 127,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('127');
     });
@@ -574,8 +590,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toMatch(/Metrics|METRICS|═|─/); // Section header or border
     });
@@ -592,8 +608,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should have borders, lines, or spacing
       expect(rendered).toMatch(/─|═|━|▬|\n\n/);
@@ -611,8 +627,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should have consistent spacing/alignment
       const lines = rendered.split('\n').filter(l => l.includes(':'));
@@ -637,8 +653,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(40);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 40 });
+      const rendered = display.render();
 
       const lines = rendered.split('\n');
       for (const line of lines) {
@@ -660,9 +676,11 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const narrowRender = display.render(40);
-      const wideRender = display.render(120);
+      const narrowDisplay = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 40 });
+      const narrowRender = narrowDisplay.render();
+      
+      const wideDisplay = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 100 });
+      const wideRender = wideDisplay.render();
 
       expect(narrowRender).toBeTruthy();
       expect(wideRender).toBeTruthy();
@@ -681,8 +699,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(20);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
       // Should truncate or wrap, not crash
@@ -702,10 +720,10 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
       
-      const firstRender = display.render(80);
-      const secondRender = display.render(80);
+      const firstRender = display.render();
+      const secondRender = display.render();
 
       expect(firstRender).toBe(secondRender);
       // Should return exact same string instance if cached
@@ -724,18 +742,18 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(initialMetrics, mockTheme);
-      const firstRender = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(initialMetrics), theme: mockTheme, width: 80 });
+      const firstRender = display.render();
 
-      // Update metrics
+      // Create new display with updated metrics
       const updatedMetrics: AgentMetrics = {
         ...initialMetrics,
         inputTokens: 2000,
         turnCount: 2,
       };
-      display.updateMetrics(updatedMetrics);
+      const updatedDisplay = new MetricsDisplay({ agent: createMockAgent(updatedMetrics), theme: mockTheme, width: 80 });
 
-      const secondRender = display.render(80);
+      const secondRender = updatedDisplay.render();
 
       expect(secondRender).not.toBe(firstRender);
       expect(secondRender).toContain('2.0k'); // Updated input tokens
@@ -754,11 +772,13 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const narrowDisplay = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 40 });
+      const narrowRender = narrowDisplay.render();
       
-      const narrowRender = display.render(40);
-      const wideRender = display.render(80);
+      const wideDisplay = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 100 });
+      const wideRender = wideDisplay.render();
 
+      // Different widths should produce different output
       expect(narrowRender).not.toBe(wideRender);
     });
 
@@ -774,12 +794,12 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
       
-      display.render(80); // Cache render
+      display.render(); // Cache render
       display.invalidate(); // Clear cache
       
-      const afterInvalidate = display.render(80);
+      const afterInvalidate = display.render();
       
       expect(afterInvalidate).toBeTruthy();
       expect(display.invalidate).toBeDefined();
@@ -799,8 +819,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 5,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should show some indication of cache efficiency
       // Efficiency = cache reads / (input tokens + cache reads)
@@ -820,8 +840,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 3,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Cache efficiency = 5000 / (5000 + 5000) = 50%
       expect(rendered).toContain('50%');
@@ -839,8 +859,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 2,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // Should show 0% efficiency or hide efficiency metric
       expect(rendered).toMatch(/0%|N\/A/);
@@ -858,8 +878,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 5,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('100%');
     });
@@ -878,8 +898,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: -1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
       // Should display as 0 or handle gracefully
@@ -898,8 +918,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 99999,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
       // Should not crash or produce NaN
@@ -919,8 +939,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: NaN,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
       // Should display as 0 or N/A
@@ -933,17 +953,17 @@ describe('MetricsDisplay Component', () => {
         // Missing other properties
       } as any;
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
       // Should handle missing values gracefully
     });
 
-    it('should handle null metrics object', () => {
+    it('should handle null agent object', () => {
       expect(() => {
-        new MetricsDisplay(null as any, mockTheme);
-      }).toThrow(); // Should throw or handle gracefully
+        new MetricsDisplay({ agent: null as any, theme: mockTheme, width: 80 });
+      }).toThrow(); // Should throw when agent is null
     });
 
     it('should handle zero width', () => {
@@ -958,8 +978,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(0);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
       // Should render something minimal or return empty string
@@ -977,11 +997,11 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(-10);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: -10 });
+      const rendered = display.render();
 
       expect(rendered).toBeTruthy();
-      // Should handle gracefully
+      // Should handle gracefully (negative width constrained to minimum)
     });
   });
 
@@ -998,8 +1018,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       // All tokens should use K suffix where appropriate
       expect(rendered).toContain('1.2k');
@@ -1022,8 +1042,8 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
-      const rendered = display.render(80);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
+      const rendered = display.render();
 
       expect(rendered).toContain('$0.0034');
     });
@@ -1042,10 +1062,10 @@ describe('MetricsDisplay Component', () => {
         turnCount: 8,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
       
       const startTime = Date.now();
-      display.render(80);
+      display.render();
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(100); // Should render in < 100ms
@@ -1063,14 +1083,14 @@ describe('MetricsDisplay Component', () => {
         turnCount: 8,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
       
       // Prime the cache
-      display.render(80);
+      display.render();
       
       // Measure cached render
       const startTime = Date.now();
-      display.render(80);
+      display.render();
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(10); // Cached should be very fast
@@ -1088,13 +1108,13 @@ describe('MetricsDisplay Component', () => {
         turnCount: 1,
       };
 
-      const display = new MetricsDisplay(metrics, mockTheme);
+      const display = new MetricsDisplay({ agent: createMockAgent(metrics), theme: mockTheme, width: 80 });
       
       const iterations = 100;
       const startTime = Date.now();
       
       for (let i = 0; i < iterations; i++) {
-        display.render(80);
+        display.render();
       }
       
       const totalDuration = Date.now() - startTime;
