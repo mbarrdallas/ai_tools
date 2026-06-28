@@ -32,7 +32,7 @@ interface DashboardControllerProps {
  */
 interface PiContext {
   ui: {
-    custom: (config: any) => any;
+    custom: (factory: any, options?: any) => any;
   };
 }
 
@@ -112,22 +112,38 @@ export class DashboardController {
       return;
     }
 
-    // Create dashboard component
-    const dashboard = new DashboardComponent({
-      stateManager: this.stateManager,
-      controller: this,
-      onClose: () => this.hide(),
-    });
-
-    // Render as overlay using Pi's UI API
+    // Render as overlay using Pi's UI API.
+    // ctx.ui.custom() takes a factory fn: (tui, theme, keybindings, done) => component
+    // The overlay handle is delivered via onHandle callback.
     try {
-      this.dashboardHandle = this.ctx.ui.custom({
-        overlay: true,
-        anchor: DASHBOARD_OVERLAY_CONFIG.anchor,
-        widthPercent: DASHBOARD_OVERLAY_CONFIG.widthPercent,
-        heightPercent: DASHBOARD_OVERLAY_CONFIG.heightPercent,
-        component: dashboard,
-      });
+      this.ctx.ui.custom(
+        (tui: any, _theme: any, _keybindings: any, done: (result: null) => void) => {
+          const dashboard = new DashboardComponent({
+            stateManager: this.stateManager,
+            controller: this,
+            onClose: () => { done(null); },
+          });
+          return {
+            render: (width: number) => dashboard.render(width),
+            invalidate: () => dashboard.invalidate(),
+            handleInput: (data: string) => {
+              dashboard.handleInput(data);
+              tui.requestRender();
+            },
+          };
+        },
+        {
+          overlay: true,
+          overlayOptions: {
+            width: `${DASHBOARD_OVERLAY_CONFIG.widthPercent}%`,
+            maxHeight: `${DASHBOARD_OVERLAY_CONFIG.heightPercent}%`,
+            anchor: DASHBOARD_OVERLAY_CONFIG.anchor,
+          },
+          onHandle: (handle: any) => {
+            this.dashboardHandle = handle;
+          },
+        }
+      );
 
       this.visible = true;
       this.visibilityListeners.forEach(fn => fn());
@@ -150,20 +166,13 @@ export class DashboardController {
       return;
     }
 
-    // Close the overlay if we have a handle
+    // Remove the overlay using the handle delivered via onHandle
     if (this.dashboardHandle) {
       try {
-        // Call close() or dispose() on the handle
-        // Exact API depends on Pi's overlay implementation
-        if (typeof this.dashboardHandle.close === 'function') {
-          this.dashboardHandle.close();
-        } else if (typeof this.dashboardHandle.dispose === 'function') {
-          this.dashboardHandle.dispose();
-        }
+        this.dashboardHandle.hide();
       } catch (error) {
         console.error('DashboardController: error closing dashboard', error);
       }
-
       this.dashboardHandle = null;
     }
 
@@ -300,11 +309,7 @@ export class DashboardController {
   requestRender(): void {
     if (this.visible && this.dashboardHandle) {
       try {
-        if (typeof this.dashboardHandle.requestRender === 'function') {
-          this.dashboardHandle.requestRender();
-        } else if (typeof this.dashboardHandle.render === 'function') {
-          this.dashboardHandle.render();
-        }
+        this.dashboardHandle.requestRender();
       } catch {
         // Silently ignore render errors
       }
