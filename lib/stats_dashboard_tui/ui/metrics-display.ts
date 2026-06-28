@@ -23,36 +23,40 @@ interface Theme {
 }
 
 /**
+ * Props for MetricsDisplay component
+ */
+export interface MetricsDisplayProps {
+  /** Agent to display metrics for */
+  agent: import('../types').Agent;
+  /** Optional theme for styling */
+  theme?: Theme | null;
+  /** Display width in characters */
+  width: number;
+}
+
+/**
  * MetricsDisplay component for rendering agent metrics
  */
 export class MetricsDisplay {
-  private metrics: AgentMetrics;
+  private agent: import('../types').Agent;
   private theme: Theme | null;
-  private renderCache: { width: number; output: string } | null = null;
+  private width: number;
+  private renderCache: string | null = null;
+  private lastRenderState: string | null = null;
 
   /**
    * Create a new MetricsDisplay instance
    * 
-   * @param metrics - Agent metrics to display
-   * @param theme - Optional theme for styling
+   * @param props - Component props
    */
-  constructor(metrics: AgentMetrics, theme: Theme | null = null) {
-    if (!metrics) {
-      throw new Error('Metrics object is required');
+  constructor(props: MetricsDisplayProps) {
+    if (!props.agent) {
+      throw new Error('Agent is required');
     }
 
-    this.metrics = metrics;
-    this.theme = theme;
-  }
-
-  /**
-   * Update metrics and invalidate cache
-   * 
-   * @param metrics - Updated metrics
-   */
-  public updateMetrics(metrics: AgentMetrics): void {
-    this.metrics = metrics;
-    this.invalidate();
+    this.agent = props.agent;
+    this.theme = props.theme ?? null;
+    this.width = Math.max(20, props.width);
   }
 
   /**
@@ -60,22 +64,25 @@ export class MetricsDisplay {
    */
   public invalidate(): void {
     this.renderCache = null;
+    this.lastRenderState = null;
   }
 
   /**
-   * Render metrics display with given width
+   * Render metrics display
    * 
-   * @param width - Available width for rendering
    * @returns Rendered metrics as string
    */
-  public render(width: number): string {
+  public render(): string {
+    // Generate state hash for cache invalidation
+    const stateHash = this.generateStateHash();
+    
     // Check cache
-    if (this.renderCache && this.renderCache.width === width) {
-      return this.renderCache.output;
+    if (this.renderCache !== null && this.lastRenderState === stateHash) {
+      return this.renderCache;
     }
 
     // Ensure minimum width
-    const effectiveWidth = Math.max(20, width);
+    const effectiveWidth = Math.max(20, this.width);
 
     const lines: string[] = [];
 
@@ -108,9 +115,20 @@ export class MetricsDisplay {
     const output = lines.join('\n');
 
     // Cache the result
-    this.renderCache = { width, output };
+    this.renderCache = output;
+    this.lastRenderState = stateHash;
 
     return output;
+  }
+
+  /**
+   * Generate state hash for cache invalidation
+   */
+  private generateStateHash(): string {
+    return JSON.stringify({
+      metrics: this.agent.metrics,
+      width: this.width,
+    });
   }
 
   /**
@@ -129,10 +147,10 @@ export class MetricsDisplay {
     const lines: string[] = [];
 
     // Ensure metrics have valid values
-    const inputTokens = this.sanitizeNumber(this.metrics.inputTokens);
-    const outputTokens = this.sanitizeNumber(this.metrics.outputTokens);
-    const cacheReadTokens = this.sanitizeNumber(this.metrics.cacheReadTokens);
-    const cacheWriteTokens = this.sanitizeNumber(this.metrics.cacheWriteTokens);
+    const inputTokens = this.sanitizeNumber(this.agent.metrics.inputTokens);
+    const outputTokens = this.sanitizeNumber(this.agent.metrics.outputTokens);
+    const cacheReadTokens = this.sanitizeNumber(this.agent.metrics.cacheReadTokens);
+    const cacheWriteTokens = this.sanitizeNumber(this.agent.metrics.cacheWriteTokens);
 
     // Use consistent label width across all metrics
     const labelWidth = this.getLabelWidth();
@@ -152,7 +170,7 @@ export class MetricsDisplay {
    * Render cost section
    */
   private renderCost(width: number): string {
-    const cost = this.sanitizeCost(this.metrics.totalCost);
+    const cost = this.sanitizeCost(this.agent.metrics.totalCost);
     const labelWidth = this.getLabelWidth();
     return this.renderMetricRow('Cost', formatCost(cost), labelWidth, width);
   }
@@ -161,8 +179,8 @@ export class MetricsDisplay {
    * Render context window progress bar
    */
   private renderContextWindow(width: number): string {
-    const contextTokens = this.sanitizeNumber(this.metrics.contextTokens);
-    const contextLimit = this.sanitizeNumber(this.metrics.contextLimit);
+    const contextTokens = this.sanitizeNumber(this.agent.metrics.contextTokens);
+    const contextLimit = this.sanitizeNumber(this.agent.metrics.contextLimit);
 
     // Handle zero or invalid limit
     if (contextLimit <= 0) {
@@ -208,8 +226,8 @@ export class MetricsDisplay {
    * Returns null if not applicable (no cache reads)
    */
   private calculateCacheEfficiency(): number | null {
-    const inputTokens = this.sanitizeNumber(this.metrics.inputTokens);
-    const cacheReadTokens = this.sanitizeNumber(this.metrics.cacheReadTokens);
+    const inputTokens = this.sanitizeNumber(this.agent.metrics.inputTokens);
+    const cacheReadTokens = this.sanitizeNumber(this.agent.metrics.cacheReadTokens);
 
     const totalInputTokens = inputTokens + cacheReadTokens;
 
@@ -236,7 +254,7 @@ export class MetricsDisplay {
    * Render turn count
    */
   private renderTurnCount(width: number): string {
-    const turnCount = this.sanitizeNumber(this.metrics.turnCount);
+    const turnCount = this.sanitizeNumber(this.agent.metrics.turnCount);
     const labelWidth = this.getLabelWidth();
     return this.renderMetricRow('Turn', turnCount.toString(), labelWidth, width);
   }

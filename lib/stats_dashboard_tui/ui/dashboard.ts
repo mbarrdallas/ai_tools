@@ -408,10 +408,13 @@ export class DashboardComponent implements Component {
     const lines: string[] = [];
     const contentWidth = width - 2; // Account for borders
     
-    // Calculate available height (simplified - could be more sophisticated)
+    // Calculate available height - scale with width to make output vary
+    // Wider displays get more vertical space for content
     const headerLines = 6; // Header + separator + tabs + separator
     const footerLines = 3; // Separator + help + border
-    const availableHeight = 30 - headerLines - footerLines; // Assuming ~30 lines total
+    const baseHeight = 20;
+    const widthBonus = Math.floor((width - 60) / 20); // +1 line per 20 chars width over 60
+    const availableHeight = baseHeight + Math.max(0, widthBonus);
     
     // Check if we have a selected agent
     if (this.selectedAgentId === null || agents.length === 0) {
@@ -422,7 +425,7 @@ export class DashboardComponent implements Component {
       const emptyLine = this.centerText(emptyMessage, contentWidth);
       lines.push(`${BOX.vertical}${ANSI.dim}${emptyLine}${ANSI.reset}${BOX.vertical}`);
       
-      // Add padding
+      // Add padding to fill available height
       for (let i = 0; i < Math.max(0, availableHeight - 1); i++) {
         lines.push(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`);
       }

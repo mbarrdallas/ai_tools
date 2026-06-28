@@ -9,22 +9,31 @@ import type { ToolCall } from '../types';
 import { formatDuration, formatToolArgs, truncateText, extractErrorMessage } from '../utils/format';
 
 /**
+ * Theme interface for styling
+ */
+interface Theme {
+  fg(style: string, text: string): string;
+  bg(style: string, text: string): string;
+}
+
+/**
  * Props for ToolHistory component
  */
 export interface ToolHistoryProps {
-  /** List of tool calls to display */
-  toolCalls: ToolCall[];
+  /** Agent to display tool history for */
+  agent: import('../types').Agent;
+  /** Optional theme for styling */
+  theme?: Theme | null;
   /** Display width in characters */
-  width?: number;
-  /** Display height in lines (for scrolling) */
-  height?: number;
+  width: number;
 }
 
 /**
  * ToolHistory component displays tool calls with status, timing, and expandable details
  */
 export class ToolHistory {
-  private toolCalls: ToolCall[];
+  private agent: import('../types').Agent;
+  private theme: Theme | null;
   private width: number;
   private height: number;
   private expanded: boolean;
@@ -37,10 +46,14 @@ export class ToolHistory {
    * Create a new ToolHistory component
    */
   constructor(props: ToolHistoryProps) {
-    // Handle null/undefined toolCalls
-    this.toolCalls = Array.isArray(props.toolCalls) ? props.toolCalls : [];
-    this.width = props.width || 80;
-    this.height = props.height || 20;
+    if (!props.agent) {
+      throw new Error('Agent is required');
+    }
+
+    this.agent = props.agent;
+    this.theme = props.theme ?? null;
+    this.width = Math.max(20, props.width);
+    this.height = 20; // Default height
     this.expanded = false;
     this.scrollOffset = 0;
     this.selectedIndex = 0;
@@ -51,11 +64,9 @@ export class ToolHistory {
   /**
    * Render the tool history component
    * 
-   * @param width - Display width in characters
    * @returns Rendered output string
    */
-  render(width: number): string {
-    this.width = width;
+  render(): string {
 
     // Generate state hash for cache invalidation
     const stateHash = this.generateStateHash();
@@ -97,7 +108,8 @@ export class ToolHistory {
     }
 
     // Scrolling only makes sense if we have tool calls
-    if (this.toolCalls.length === 0) {
+    const toolCalls = this.agent.toolCalls || [];
+    if (toolCalls.length === 0) {
       return false;
     }
 
@@ -136,9 +148,10 @@ export class ToolHistory {
    * Generate state hash for cache invalidation
    */
   private generateStateHash(): string {
+    const toolCalls = this.agent.toolCalls || [];
     return JSON.stringify({
-      toolCallIds: this.toolCalls.map(tc => tc.id),
-      toolCallStatuses: this.toolCalls.map(tc => tc.status),
+      toolCallIds: toolCalls.map(tc => tc.id),
+      toolCallStatuses: toolCalls.map(tc => tc.status),
       expanded: this.expanded,
       scrollOffset: this.scrollOffset,
       selectedIndex: this.selectedIndex,
@@ -158,13 +171,15 @@ export class ToolHistory {
    * Generate the output string
    */
   private generateOutput(): string {
+    const toolCalls = this.agent.toolCalls || [];
+    
     // Handle empty state
-    if (this.toolCalls.length === 0) {
+    if (toolCalls.length === 0) {
       return this.renderEmptyState();
     }
 
     // Sort tool calls by startTime (newest first)
-    const sortedCalls = [...this.toolCalls].sort((a, b) => b.startTime - a.startTime);
+    const sortedCalls = [...toolCalls].sort((a, b) => b.startTime - a.startTime);
 
     // Render each tool call
     const lines: string[] = [];
@@ -216,14 +231,18 @@ export class ToolHistory {
       durationStr = ` (${formatDuration(toolCall.duration)})`;
     }
 
-    // Build the line
-    let line = `${icon} ${toolName}: ${argsSummary}${durationStr}`;
+    // Build the line with status text for failed calls
+    let statusText = '';
+    if (toolCall.status === 'failed' || toolCall.isError) {
+      statusText = ' [FAILED]';
+    }
+
+    let line = `${icon} ${toolName}: ${argsSummary}${durationStr}${statusText}`;
 
     // Apply error styling if failed
     if (toolCall.status === 'failed' || toolCall.isError) {
-      // Note: Actual color codes would be applied here in real implementation
-      // For now, we just include the content
-      line = line; // Error styling would wrap this
+      // Apply red color for error
+      line = `\x1b[31m${line}\x1b[0m`;
     }
 
     // Truncate to fit width
@@ -378,7 +397,8 @@ export class ToolHistory {
    * Scroll down one line
    */
   private scrollDown(): void {
-    const sortedCalls = [...this.toolCalls].sort((a, b) => b.startTime - a.startTime);
+    const toolCalls = this.agent.toolCalls || [];
+    const sortedCalls = [...toolCalls].sort((a, b) => b.startTime - a.startTime);
     const maxIndex = sortedCalls.length - 1;
     
     if (this.selectedIndex < maxIndex) {
@@ -409,7 +429,8 @@ export class ToolHistory {
    * Scroll down one page
    */
   private pageDown(): void {
-    const sortedCalls = [...this.toolCalls].sort((a, b) => b.startTime - a.startTime);
+    const toolCalls = this.agent.toolCalls || [];
+    const sortedCalls = [...toolCalls].sort((a, b) => b.startTime - a.startTime);
     const maxIndex = sortedCalls.length - 1;
     
     this.selectedIndex = Math.min(maxIndex, this.selectedIndex + this.height);

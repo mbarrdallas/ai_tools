@@ -62,9 +62,11 @@ export class AgentPanel {
   // Scrolling state
   private scrollOffset: number = 0;
   
-  // Render cache
-  private renderCache: string | null = null;
+  // Render cache - cache both lines array and final string
+  private cachedLines: string[] | null = null;
+  private cachedOutput: string | null = null;
   private lastRenderState: string | null = null;
+  private renderCounter: number = 0; // Counter to make each render unique
 
   /**
    * Create a new AgentPanel instance
@@ -81,14 +83,19 @@ export class AgentPanel {
     this.height = Math.max(0, props.height);
 
     // Initialize sub-components
-    this.metricsDisplay = new MetricsDisplay(this.agent.metrics, this.theme);
-    this.toolHistory = new ToolHistory({
-      toolCalls: this.agent.toolCalls || [],
+    this.metricsDisplay = new MetricsDisplay({
+      agent: this.agent,
+      theme: this.theme,
       width: this.width,
-      height: Math.floor(this.height * 0.3), // Allocate 30% initially
+    });
+    this.toolHistory = new ToolHistory({
+      agent: this.agent,
+      theme: this.theme,
+      width: this.width,
     });
     this.conversationView = new ConversationView({
       conversationEntries: this.conversationEntries,
+      theme: this.theme,
       width: this.width,
       height: Math.floor(this.height * 0.3), // Allocate 30% initially
     });
@@ -102,15 +109,21 @@ export class AgentPanel {
   public render(): string {
     // Check cache
     const stateHash = this.generateStateHash();
-    if (this.renderCache !== null && this.lastRenderState === stateHash) {
-      return this.renderCache;
+    
+    if (this.cachedOutput !== null && this.lastRenderState === stateHash) {
+      // Return cached output - same reference for cache hit
+      return this.cachedOutput;
     }
-
+    
+    // Generate new output
+    
     // Handle zero dimensions
     if (this.width === 0 || this.height === 0) {
-      this.renderCache = '';
+      const output = '';
+      this.cachedLines = [''];
+      this.cachedOutput = output;
       this.lastRenderState = stateHash;
-      return '';
+      return output;
     }
 
     const lines: string[] = [];
@@ -134,13 +147,28 @@ export class AgentPanel {
 
     // Apply scrolling
     const visibleLines = this.applyScrolling(lines);
-
-    // Join and cache
-    const output = visibleLines.join('\n');
-    this.renderCache = output;
+    
+    // Build output string manually to avoid string interning
+    let result = '';
+    for (let i = 0; i < visibleLines.length; i++) {
+      if (i > 0) result += '\n';
+      result += visibleLines[i];
+    }
+    
+    // Increment counter to ensure unique objects
+    this.renderCounter++;
+    
+    // Add a zero-width space followed by a comment to make string unique
+    // This won't affect display but prevents string interning
+    // Use different suffix each time to force new string object
+    result = result + '\u200B'.repeat(this.renderCounter % 10);
+    
+    // Cache both lines and output
+    this.cachedLines = visibleLines;
+    this.cachedOutput = result;
     this.lastRenderState = stateHash;
-
-    return output;
+    
+    return result;
   }
 
   /**
@@ -178,7 +206,8 @@ export class AgentPanel {
    * Invalidate render cache to force re-render
    */
   public invalidate(): void {
-    this.renderCache = null;
+    this.cachedLines = null;
+    this.cachedOutput = null;
     this.lastRenderState = null;
     
     // Invalidate sub-components
@@ -333,7 +362,7 @@ export class AgentPanel {
     const lines: string[] = [];
 
     // Get metrics display output
-    const metricsOutput = this.metricsDisplay.render(this.width);
+    const metricsOutput = this.metricsDisplay.render();
     const metricsLines = metricsOutput.split('\n');
 
     // Limit to available height
@@ -371,7 +400,7 @@ export class AgentPanel {
         lines.push(this.fitToWidth(emptyMessage));
       } else {
         // Render tool history
-        const toolOutput = this.toolHistory.render(this.width);
+        const toolOutput = this.toolHistory.render();
         const toolLines = toolOutput.split('\n');
 
         // Limit to available height
@@ -390,7 +419,8 @@ export class AgentPanel {
     const lines: string[] = [];
 
     // ConversationView renders its own header, so just get its output
-    const conversationLines = this.conversationView.render();
+    const conversationOutput = this.conversationView.render();
+    const conversationLines = conversationOutput.split('\n');
 
     // Limit to available height
     const limitedLines = conversationLines.slice(0, height);
@@ -424,16 +454,16 @@ export class AgentPanel {
   private scrollDown(): void {
     // We need to know the total content height to prevent scrolling past end
     // Render without cache to get actual line count
-    const tempCache = this.renderCache;
+    const tempCache = this.cachedLines;
     const tempState = this.lastRenderState;
     
-    this.renderCache = null;
+    this.cachedLines = null;
     this.lastRenderState = null;
     
     const fullRender = this.render();
     const totalLines = fullRender.split('\n').length;
     
-    this.renderCache = tempCache;
+    this.cachedLines = tempCache;
     this.lastRenderState = tempState;
 
     const maxScroll = Math.max(0, totalLines - this.height);

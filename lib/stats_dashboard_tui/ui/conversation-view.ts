@@ -17,20 +17,31 @@
 import { ConversationEntry, MessageRole } from '../types';
 import { truncateText } from '../utils/format';
 
+/**
+ * Theme interface for styling
+ */
+interface Theme {
+  fg(style: string, text: string): string;
+  bg(style: string, text: string): string;
+}
+
 export interface ConversationViewProps {
   conversationEntries: ConversationEntry[];
+  theme?: Theme | null;
   width: number;
-  height: number;
+  height?: number;
 }
 
 export class ConversationView {
   private conversationEntries: ConversationEntry[];
+  private theme: Theme | null;
   private width: number;
   private height: number;
   private scrollOffset: number = 0;
   private scrollInitialized: boolean = false;
   private isExpanded: boolean = false;
   private renderCache: string[] | null = null;
+  private lastRenderState: string | null = null;
 
   constructor(props: ConversationViewProps) {
     // Validate required parameters
@@ -40,29 +51,45 @@ export class ConversationView {
     if (props.width == null) {
       throw new Error('width is required');
     }
-    if (props.height == null) {
-      throw new Error('height is required');
-    }
 
     this.conversationEntries = props.conversationEntries;
+    this.theme = props.theme ?? null;
     this.width = Math.max(0, props.width); // Ensure non-negative
-    this.height = Math.max(0, props.height); // Ensure non-negative
+    this.height = Math.max(0, props.height ?? 20); // Ensure non-negative, default to 20
   }
 
   /**
    * Render the conversation view
    * 
-   * @returns Array of strings representing rendered lines
+   * @returns String with newlines representing rendered content
    */
-  render(): string[] {
-    // Return cached render if available
-    if (this.renderCache !== null) {
-      return this.renderCache;
+  render(): string {
+    // Generate state hash for cache invalidation
+    const stateHash = this.generateStateHash();
+    
+    // Return cached render if state unchanged
+    if (this.renderCache !== null && this.lastRenderState === stateHash) {
+      return this.renderCache.join('\n');
     }
 
     // Build and cache the render
     this.renderCache = this.buildRender();
-    return this.renderCache;
+    this.lastRenderState = stateHash;
+    return this.renderCache.join('\n');
+  }
+
+  /**
+   * Generate state hash for cache invalidation
+   */
+  private generateStateHash(): string {
+    return JSON.stringify({
+      entryCount: this.conversationEntries.length,
+      entryPreviews: this.conversationEntries.map(e => e.preview.slice(0, 50)),
+      width: this.width,
+      height: this.height,
+      scrollOffset: this.scrollOffset,
+      isExpanded: this.isExpanded,
+    });
   }
 
   /**
