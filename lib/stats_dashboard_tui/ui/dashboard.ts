@@ -258,6 +258,15 @@ export class DashboardComponent implements Component {
       return;
     }
 
+    // d/D key for tab dismissal goes to TabBar
+    if (data === 'd' || data === 'D') {
+      if (this.tabBar) {
+        this.tabBar.handleInput(data);
+        this.invalidate();
+      }
+      return;
+    }
+
     // j/k and Up/Down arrows go to AgentPanel for scrolling
     if (data === 'j' || data === 'k' || data === '\x1b[A' || data === '\x1b[B') {
       if (this.agentPanel) {
@@ -328,6 +337,30 @@ export class DashboardComponent implements Component {
   }
   
   /**
+   * Handle tab dismissal request
+   * 
+   * @param agentId - Agent ID to dismiss
+   */
+  private onTabDismiss(agentId: string): void {
+    // Dismiss the agent and all its subagents
+    this.stateManager.dismissAgent(agentId);
+    // Invalidate to re-render with updated agent list
+    this.invalidate();
+  }
+  
+  /**
+   * Show a notification/warning to the user
+   * 
+   * @param notification - Notification object with type and message
+   */
+  private showNotification(notification: { type: string; message: string }): void {
+    // For now, this is a simple console warning
+    // In a real implementation, this would use Pi's notification system
+    // or show a temporary overlay message
+    console.warn(`[${notification.type}] ${notification.message}`);
+  }
+  
+  /**
    * Render the tab bar
    * 
    * @param width - Available width
@@ -344,6 +377,8 @@ export class DashboardComponent implements Component {
         agents,
         selectedId: this.selectedAgentId,
         onTabSelect: (agentId) => this.onTabSelect(agentId),
+        onTabDismiss: (agentId) => this.onTabDismiss(agentId),
+        notifyCallback: (notification) => this.showNotification(notification),
       });
     } else {
       this.tabBar.updateAgents(agents);
@@ -533,6 +568,9 @@ export class DashboardComponent implements Component {
         { key: 'Tab, Shift+Tab', description: 'Switch between tabs' },
         { key: '← →', description: 'Navigate tabs' },
         { key: '↑ ↓, j k', description: 'Scroll content' },
+      ]},
+      { category: 'Tab Management', items: [
+        { key: 'd', description: 'Dismiss selected tab (if complete/failed)' },
       ]},
     ];
     

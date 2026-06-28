@@ -22,6 +22,8 @@ interface TabBarProps {
   onTabDismiss?: (agentId: string) => void;
   /** Optional theme for styling (defaults to basic ANSI) */
   theme?: Theme;
+  /** Optional callback for showing notifications/warnings */
+  notifyCallback?: (notification: { type: string; message: string }) => void;
 }
 
 /**
@@ -64,6 +66,7 @@ export class TabBar {
   private onTabSelect?: (agentId: string) => void;
   private onTabDismiss?: (agentId: string) => void;
   private theme: Theme;
+  private notifyCallback?: (notification: { type: string; message: string }) => void;
   private cachedRender: { width: number; agentsHash: string; output: string[] } | null = null;
 
   /**
@@ -77,6 +80,7 @@ export class TabBar {
     this.onTabSelect = props.onTabSelect;
     this.onTabDismiss = props.onTabDismiss;
     this.theme = props.theme || DEFAULT_THEME;
+    this.notifyCallback = props.notifyCallback;
 
     // Validate selectedId - if invalid, use first agent or null
     if (this.selectedId && !this.agents.find(a => a.id === this.selectedId)) {
@@ -131,6 +135,12 @@ export class TabBar {
       return;
     }
 
+    // Handle dismiss key ('d' or 'D')
+    if (data === 'd' || data === 'D') {
+      this.handleDismissRequest();
+      return;
+    }
+
     // Single agent - no navigation needed
     if (this.agents.length === 1) {
       return;
@@ -173,16 +183,43 @@ export class TabBar {
 
   /**
    * Update the agents list
+   * Handles selection management when agents are removed (e.g., after dismissal)
    * 
    * @param agents - New agents array
    */
   updateAgents(agents: Agent[]): void {
+    const oldSelectedId = this.selectedId;
+    const oldAgents = this.agents;
     this.agents = agents;
     
     // Check if selected agent still exists
     if (this.selectedId && !this.agents.find(a => a.id === this.selectedId)) {
-      // Select first agent or null
-      this.selectedId = this.agents.length > 0 ? this.agents[0].id : null;
+      // Find the index where the dismissed agent was
+      const oldIndex = oldAgents.findIndex(a => a.id === oldSelectedId);
+      
+      if (this.agents.length === 0) {
+        // No agents left
+        this.selectedId = null;
+      } else if (oldIndex >= 0) {
+        // Try to select the next agent (at same index, or previous if at end)
+        let newIndex: number;
+        if (oldIndex < this.agents.length) {
+          // Select agent at same index (which is now the "next" agent)
+          newIndex = oldIndex;
+        } else {
+          // We were at the end, select the new last agent
+          newIndex = this.agents.length - 1;
+        }
+        this.selectedId = this.agents[newIndex].id;
+      } else {
+        // Fallback to first agent
+        this.selectedId = this.agents.length > 0 ? this.agents[0].id : null;
+      }
+      
+      // Notify selection change
+      if (this.selectedId && this.onTabSelect) {
+        this.onTabSelect(this.selectedId);
+      }
     }
     
     this.invalidate();
@@ -407,6 +444,67 @@ export class TabBar {
    */
   private stripAnsi(text: string): string {
     return text.replace(/\x1B\[[0-9;]*m/g, '');
+  }
+
+  /**
+   * Handle dismiss request for selected tab
+   * Validates that agent can be dismissed and calls onTabDismiss callback
+   */
+  private handleDismissRequest(): void {
+    // Must have a selected agent
+    if (!this.selectedId) {
+      return;
+    }
+
+    // Find the selected agent
+    const agent = this.agents.find(a => a.id === this.selectedId);
+    if (!agent) {
+      return;
+    }
+
+    // Check if agent is running
+    if (agent.status === 'running') {
+      this.showWarning('Cannot dismiss a running agent. Wait for it to complete or fail.');
+      return;
+    }
+
+    // Check if agent has running subagents
+    if (this.hasRunningSubagents(agent)) {
+      this.showWarning('Cannot dismiss agent with running subagents. Wait for them to complete.');
+      return;
+    }
+
+    // Agent can be dismissed - call callback
+    if (this.onTabDismiss) {
+      this.onTabDismiss(agent.id);
+    }
+  }
+
+  /**
+   * Check if an agent has any running subagents
+   * 
+   * @param agent - Agent to check
+   * @returns true if agent has running subagents
+   */
+  private hasRunningSubagents(agent: Agent): boolean {
+    for (const subagentId of agent.subagentIds) {
+      const subagent = this.agents.find(a => a.id === subagentId);
+      if (subagent && subagent.status === 'running') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Show a warning notification
+   * 
+   * @param message - Warning message to display
+   */
+  private showWarning(message: string): void {
+    if (this.notifyCallback) {
+      this.notifyCallback({ type: 'warning', message });
+    }
   }
 
   /**

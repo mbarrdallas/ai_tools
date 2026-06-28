@@ -476,9 +476,13 @@ describe('StateManager', () => {
       const parent = stateManager.getAgent(parentId);
       expect(parent?.subagentIds).not.toContain(childId);
       
-      // Grandchild might be orphaned but should not cause errors
+      // With T15, dismissing an agent also dismisses all its descendants (cascading delete)
+      // This prevents orphaned agents and ensures clean memory management
+      const child = stateManager.getAgent(childId);
+      expect(child).toBeUndefined();
+      
       const grandchild = stateManager.getAgent(grandchildId);
-      expect(grandchild?.parentId).toBe(childId); // Still references dismissed parent
+      expect(grandchild).toBeUndefined(); // Grandchild is also dismissed
     });
 
     it('should handle dismissing multiple agents', () => {

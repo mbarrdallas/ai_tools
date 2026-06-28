@@ -143,10 +143,24 @@ export class StateManager {
 
   /**
    * Remove an agent from the state, cleaning up parent references
+   * Recursively dismisses all subagents (children, grandchildren, etc.)
    * 
    * @param id - Agent ID to dismiss
    */
   dismissAgent(id: string): void {
+    const agent = this.store.getAgent(id);
+    if (!agent) {
+      return; // Silently ignore non-existent agents
+    }
+
+    // Recursively dismiss all subagents first (depth-first)
+    // Clone the array to avoid modifying during iteration
+    const subagentIds = [...agent.subagentIds];
+    for (const subagentId of subagentIds) {
+      this.dismissAgent(subagentId);
+    }
+
+    // Now dismiss this agent (store handles parent reference cleanup)
     this.store.deleteAgent(id);
   }
 
