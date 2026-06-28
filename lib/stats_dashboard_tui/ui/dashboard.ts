@@ -4,10 +4,14 @@
  * Main dashboard component implementing the Pi TUI Component interface.
  * Provides a toggleable overlay showing agent stats with header, borders, and content area.
  * Supports keyboard navigation and render caching for performance.
+ * 
+ * Integrates TabBar for agent selection and AgentPanel for detail display.
  */
 
 import type { StateManager } from '../state/state-manager';
-import type { Agent, DashboardState } from '../types';
+import type { Agent, DashboardState, ConversationEntry } from '../types';
+import { TabBar } from './tabs';
+import { AgentPanel } from './agent-panel';
 
 /**
  * Overlay configuration for dashboard positioning
@@ -90,6 +94,13 @@ export class DashboardComponent implements Component {
   private controller: DashboardController;
   private onClose?: () => void;
   private cachedRender: { width: number; output: string[] } | null = null;
+  
+  // Component instances
+  private tabBar: TabBar | null = null;
+  private agentPanel: AgentPanel | null = null;
+  
+  // Selection state
+  private selectedAgentId: string | null = null;
 
   /**
    * Create a new DashboardComponent
@@ -134,11 +145,21 @@ export class DashboardComponent implements Component {
     const agents = this.stateManager.getAllAgents();
     const dashboardState = this.stateManager.getDashboardState();
 
+    // Apply auto-selection logic
+    this.updateSelection(agents);
+
     // Render header
     output.push(...this.renderHeader(constrainedWidth));
 
-    // Render content area
-    output.push(...this.renderContent(constrainedWidth, agents, dashboardState));
+    // Render tab bar
+    output.push(...this.renderTabBar(constrainedWidth, agents));
+
+    // Add separator
+    const separator = BOX.verticalRight + BOX.horizontal.repeat(constrainedWidth - 2) + BOX.verticalLeft;
+    output.push(separator);
+
+    // Render agent panel
+    output.push(...this.renderAgentPanel(constrainedWidth, agents));
 
     // Render footer with help text
     output.push(...this.renderFooter(constrainedWidth));
@@ -166,9 +187,34 @@ export class DashboardComponent implements Component {
       if (this.onClose) {
         this.onClose();
       }
+      return;
     }
 
-    // Additional key handling can be added here in future tasks
+    // Route keyboard input to appropriate component
+    // Tab/Shift+Tab and Left/Right arrows go to TabBar for navigation
+    if (data === '\t' || data === '\x1b[Z' || data === '\x1b[C' || data === '\x1b[D') {
+      if (this.tabBar) {
+        this.tabBar.handleInput(data);
+        this.invalidate(); // Invalidate to trigger re-render with new selection
+      }
+      return;
+    }
+
+    // j/k and Up/Down arrows go to AgentPanel for scrolling
+    if (data === 'j' || data === 'k' || data === '\x1b[A' || data === '\x1b[B') {
+      if (this.agentPanel) {
+        const key = data === 'j' ? 'down' : data === 'k' ? 'up' : data === '\x1b[A' ? 'up' : 'down';
+        this.agentPanel.handleInput({ key });
+        this.invalidate();
+      }
+      return;
+    }
+
+    // Other keys can be routed to AgentPanel (e.g., for expand/collapse)
+    if (this.agentPanel) {
+      this.agentPanel.handleInput({ key: data });
+      this.invalidate();
+    }
   }
 
   /**
@@ -176,6 +222,159 @@ export class DashboardComponent implements Component {
    */
   invalidate(): void {
     this.cachedRender = null;
+    
+    // Invalidate sub-components
+    if (this.tabBar) {
+      this.tabBar.invalidate();
+    }
+    if (this.agentPanel) {
+      this.agentPanel.invalidate();
+    }
+  }
+  
+  /**
+   * Update selection state with auto-selection logic
+   * 
+   * @param agents - Current agents list
+   */
+  private updateSelection(agents: Agent[]): void {
+    // If no agents, clear selection
+    if (agents.length === 0) {
+      this.selectedAgentId = null;
+      return;
+    }
+    
+    // If we have a selection, check if it still exists
+    if (this.selectedAgentId !== null) {
+      const selectedExists = agents.some(a => a.id === this.selectedAgentId);
+      if (selectedExists) {
+        return; // Keep current selection
+      }
+      // Selected agent was removed, select another
+      this.selectedAgentId = agents[0].id;
+      return;
+    }
+    
+    // No selection, auto-select first agent
+    this.selectedAgentId = agents[0].id;
+  }
+  
+  /**
+   * Handle tab selection change
+   * 
+   * @param agentId - Newly selected agent ID
+   */
+  private onTabSelect(agentId: string): void {
+    this.selectedAgentId = agentId;
+    this.invalidate();
+  }
+  
+  /**
+   * Render the tab bar
+   * 
+   * @param width - Available width
+   * @param agents - Current agents list
+   * @returns Array of tab bar lines
+   */
+  private renderTabBar(width: number, agents: Agent[]): string[] {
+    const lines: string[] = [];
+    const contentWidth = width - 2; // Account for borders
+    
+    // Create or update TabBar instance
+    if (!this.tabBar) {
+      this.tabBar = new TabBar({
+        agents,
+        selectedId: this.selectedAgentId,
+        onTabSelect: (agentId) => this.onTabSelect(agentId),
+      });
+    } else {
+      this.tabBar.updateAgents(agents);
+      this.tabBar.setSelectedId(this.selectedAgentId);
+    }
+    
+    // Render tab bar
+    const tabBarOutput = this.tabBar.render(contentWidth);
+    
+    // Wrap in borders
+    for (const line of tabBarOutput) {
+      const paddedLine = this.padText(line, contentWidth);
+      lines.push(`${BOX.vertical}${paddedLine}${BOX.vertical}`);
+    }
+    
+    return lines;
+  }
+  
+  /**
+   * Render the agent panel
+   * 
+   * @param width - Available width
+   * @param agents - Current agents list
+   * @returns Array of agent panel lines
+   */
+  private renderAgentPanel(width: number, agents: Agent[]): string[] {
+    const lines: string[] = [];
+    const contentWidth = width - 2; // Account for borders
+    
+    // Calculate available height (simplified - could be more sophisticated)
+    const headerLines = 6; // Header + separator + tabs + separator
+    const footerLines = 3; // Separator + help + border
+    const availableHeight = 30 - headerLines - footerLines; // Assuming ~30 lines total
+    
+    // Check if we have a selected agent
+    if (this.selectedAgentId === null || agents.length === 0) {
+      // Empty state
+      const emptyMessage = this.selectedAgentId === null && agents.length > 0
+        ? 'Select an agent to view details'
+        : 'No agents running yet';
+      const emptyLine = this.centerText(emptyMessage, contentWidth);
+      lines.push(`${BOX.vertical}${ANSI.dim}${emptyLine}${ANSI.reset}${BOX.vertical}`);
+      
+      // Add padding
+      for (let i = 0; i < Math.max(0, availableHeight - 1); i++) {
+        lines.push(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`);
+      }
+      
+      return lines;
+    }
+    
+    // Get selected agent
+    const agent = agents.find(a => a.id === this.selectedAgentId);
+    if (!agent) {
+      // Agent not found, show error
+      const errorLine = this.centerText('Agent not found', contentWidth);
+      lines.push(`${BOX.vertical}${ANSI.dim}${errorLine}${ANSI.reset}${BOX.vertical}`);
+      return lines;
+    }
+    
+    // Get conversation entries (empty for now - would come from state manager)
+    const conversationEntries: ConversationEntry[] = [];
+    
+    // Create or update AgentPanel instance
+    this.agentPanel = new AgentPanel({
+      agent,
+      conversationEntries,
+      theme: null, // Using default theme
+      width: contentWidth,
+      height: availableHeight,
+    });
+    
+    // Render agent panel
+    const panelOutput = this.agentPanel.render();
+    const panelLines = panelOutput.split('\n');
+    
+    // Wrap in borders
+    for (const line of panelLines) {
+      const paddedLine = this.padText(line, contentWidth);
+      lines.push(`${BOX.vertical}${paddedLine}${BOX.vertical}`);
+    }
+    
+    // Fill remaining height with empty lines
+    const remainingLines = Math.max(0, availableHeight - panelLines.length);
+    for (let i = 0; i < remainingLines; i++) {
+      lines.push(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`);
+    }
+    
+    return lines;
   }
 
   /**
@@ -204,64 +403,7 @@ export class DashboardComponent implements Component {
     return lines;
   }
 
-  /**
-   * Render the main content area
-   * 
-   * @param width - Available width
-   * @param agents - Array of agents to display
-   * @param dashboardState - Current dashboard state
-   * @returns Array of content lines
-   */
-  private renderContent(width: number, agents: Agent[], dashboardState: DashboardState | null): string[] {
-    const lines: string[] = [];
-    const contentWidth = width - 2; // Account for borders
 
-    if (agents.length === 0) {
-      // Empty state
-      const emptyMessage = 'No agents running yet';
-      const emptyLine = this.centerText(emptyMessage, contentWidth);
-      lines.push(`${BOX.vertical}${ANSI.dim}${emptyLine}${ANSI.reset}${BOX.vertical}`);
-      
-      // Add some padding
-      for (let i = 0; i < 3; i++) {
-        lines.push(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`);
-      }
-    } else {
-      // Show agent list
-      const listHeader = `${agents.length} agent${agents.length === 1 ? '' : 's'} tracked`;
-      const paddedHeader = this.padText(listHeader, contentWidth);
-      lines.push(`${BOX.vertical}${ANSI.fg.white}${paddedHeader}${ANSI.reset}${BOX.vertical}`);
-
-      // Empty line
-      lines.push(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`);
-
-      // List agents (show first few)
-      const maxAgentsToShow = 5;
-      const agentsToShow = agents.slice(0, maxAgentsToShow);
-
-      for (const agent of agentsToShow) {
-        const statusIcon = this.getStatusIcon(agent.status);
-        const agentLine = `  ${statusIcon} ${agent.name}`;
-        const paddedLine = this.padText(this.truncateText(agentLine, contentWidth), contentWidth);
-        lines.push(`${BOX.vertical}${paddedLine}${BOX.vertical}`);
-      }
-
-      if (agents.length > maxAgentsToShow) {
-        const remaining = agents.length - maxAgentsToShow;
-        const moreText = `  ... and ${remaining} more`;
-        const paddedMore = this.padText(moreText, contentWidth);
-        lines.push(`${BOX.vertical}${ANSI.dim}${paddedMore}${ANSI.reset}${BOX.vertical}`);
-      }
-
-      // Add padding to make content area larger
-      const additionalPadding = 2;
-      for (let i = 0; i < additionalPadding; i++) {
-        lines.push(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`);
-      }
-    }
-
-    return lines;
-  }
 
   /**
    * Render the footer with help text
