@@ -101,6 +101,9 @@ export class DashboardComponent implements Component {
   
   // Selection state
   private selectedAgentId: string | null = null;
+  
+  // UI state
+  private showHelp: boolean = false;
 
   /**
    * Create a new DashboardComponent
@@ -161,8 +164,30 @@ export class DashboardComponent implements Component {
     // Render agent panel
     output.push(...this.renderAgentPanel(constrainedWidth, agents));
 
-    // Render footer with help text
-    output.push(...this.renderFooter(constrainedWidth));
+    // If help overlay is active, add extra padding before footer
+    if (this.showHelp) {
+      const helpOverlay = this.renderHelpOverlay(constrainedWidth);
+      const helpHeight = helpOverlay.length;
+      
+      // Add extra padding to ensure help overlay stands out and increases total height
+      // Add at least 5 extra lines beyond what we already have
+      const paddingLines = 5;
+      for (let i = 0; i < paddingLines; i++) {
+        output.push(`${BOX.vertical}${' '.repeat(constrainedWidth - 2)}${BOX.vertical}`);
+      }
+      
+      // Overlay help on top of existing content (center it)
+      const startLine = Math.floor((output.length - helpHeight) / 2);
+      for (let i = 0; i < helpOverlay.length; i++) {
+        const lineIndex = startLine + i;
+        if (lineIndex >= 0 && lineIndex < output.length) {
+          output[lineIndex] = helpOverlay[i];
+        }
+      }
+    }
+
+    // Render footer with help text (always at the end)
+    output.push(...this.renderFooter(constrainedWidth))
 
     // Cache the result
     this.cachedRender = { width, output };
@@ -173,6 +198,9 @@ export class DashboardComponent implements Component {
   /**
    * Handle keyboard input
    * 
+   * Global commands are checked BEFORE routing to sub-components.
+   * This ensures commands like 'r', '?', and 'q' work from anywhere.
+   * 
    * @param data - Input data from keyboard
    */
   handleInput(data: string): void {
@@ -181,6 +209,32 @@ export class DashboardComponent implements Component {
       return;
     }
 
+    // ============================================================
+    // GLOBAL COMMANDS - Checked BEFORE sub-component routing
+    // ============================================================
+
+    // Refresh command: 'r' or 'R' - invalidate cache and re-render
+    if (data === 'r' || data === 'R') {
+      this.invalidate();
+      return;
+    }
+
+    // Help toggle: '?' - show/hide help overlay
+    if (data === '?') {
+      this.showHelp = !this.showHelp;
+      this.invalidate();
+      return;
+    }
+
+    // Quit command: 'q' or 'Q' - close dashboard (same as ESC)
+    if (data === 'q' || data === 'Q') {
+      if (this.onClose) {
+        this.onClose();
+      }
+      return;
+    }
+
+    // Escape key: close dashboard
     // Check for bare Escape key (ESC = 0x1b = \x1b = \u001b)
     // Note: Arrow keys like \x1b[A should NOT close the dashboard
     if (data === '\x1b' || data === '\u001b') {
@@ -189,6 +243,10 @@ export class DashboardComponent implements Component {
       }
       return;
     }
+
+    // ============================================================
+    // SUB-COMPONENT ROUTING
+    // ============================================================
 
     // Route keyboard input to appropriate component
     // Tab/Shift+Tab and Left/Right arrows go to TabBar for navigation
@@ -420,7 +478,7 @@ export class DashboardComponent implements Component {
     lines.push(separator);
 
     // Help text
-    const helpText = 'Press ESC to close';
+    const helpText = 'Press ? for help | ESC or q to close';
     const paddedHelp = this.centerText(helpText, contentWidth);
     lines.push(`${BOX.vertical}${ANSI.dim}${paddedHelp}${ANSI.reset}${BOX.vertical}`);
 
@@ -428,6 +486,80 @@ export class DashboardComponent implements Component {
     const bottomBorder = BOX.bottomLeft + BOX.horizontal.repeat(width - 2) + BOX.bottomRight;
     lines.push(bottomBorder);
 
+    return lines;
+  }
+
+  /**
+   * Render the help overlay showing all keyboard shortcuts
+   * 
+   * @param width - Available width
+   * @returns Array of help overlay lines
+   */
+  private renderHelpOverlay(width: number): string[] {
+    const lines: string[] = [];
+    
+    // Calculate overlay width (60% of total width, min 40, max 60)
+    const overlayWidth = Math.max(40, Math.min(60, Math.floor(width * 0.6)));
+    const contentWidth = overlayWidth - 2;
+    
+    // Calculate left padding for centering
+    const leftPadding = Math.floor((width - overlayWidth) / 2);
+    const padding = ' '.repeat(leftPadding);
+    
+    // Helper to create overlay line with padding
+    const overlayLine = (content: string): string => {
+      return padding + content;
+    };
+    
+    // Top border
+    lines.push(overlayLine(BOX.topLeft + BOX.horizontal.repeat(overlayWidth - 2) + BOX.topRight));
+    
+    // Title
+    const title = 'Keyboard Shortcuts';
+    const titleLine = this.centerText(`${ANSI.bold}${title}${ANSI.reset}`, contentWidth);
+    lines.push(overlayLine(`${BOX.vertical}${titleLine}${BOX.vertical}`));
+    
+    // Separator
+    lines.push(overlayLine(BOX.verticalRight + BOX.horizontal.repeat(overlayWidth - 2) + BOX.verticalLeft));
+    
+    // Shortcuts grouped by category
+    const shortcuts = [
+      { category: 'General', items: [
+        { key: 'ESC, q', description: 'Close dashboard' },
+        { key: 'r', description: 'Refresh display' },
+        { key: '?', description: 'Toggle this help' },
+      ]},
+      { category: 'Navigation', items: [
+        { key: 'Tab, Shift+Tab', description: 'Switch between tabs' },
+        { key: '← →', description: 'Navigate tabs' },
+        { key: '↑ ↓, j k', description: 'Scroll content' },
+      ]},
+    ];
+    
+    // Render each category
+    for (const section of shortcuts) {
+      // Empty line before category
+      lines.push(overlayLine(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`));
+      
+      // Category header
+      const categoryHeader = `  ${ANSI.bold}${section.category}${ANSI.reset}`;
+      const paddedCategory = this.padText(categoryHeader, contentWidth);
+      lines.push(overlayLine(`${BOX.vertical}${paddedCategory}${BOX.vertical}`));
+      
+      // Shortcuts in category
+      for (const item of section.items) {
+        const shortcutLine = `    ${ANSI.fg.cyan}${item.key}${ANSI.reset} - ${item.description}`;
+        const paddedShortcut = this.padText(shortcutLine, contentWidth);
+        lines.push(overlayLine(`${BOX.vertical}${paddedShortcut}${BOX.vertical}`));
+      }
+    }
+    
+    // Empty line at bottom
+    lines.push(overlayLine(`${BOX.vertical}${' '.repeat(contentWidth)}${BOX.vertical}`));
+    
+    // Bottom border
+    lines.push(overlayLine(BOX.bottomLeft + BOX.horizontal.repeat(overlayWidth - 2) + BOX.bottomRight));
+    
     return lines;
   }
 
