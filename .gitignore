@@ -1,5 +1,19 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+build/
+
+# Test output
 coverage/
 *.log
+
+# OS
 .DS_Store
+
+# Workflow planning artifacts (belong in active_workflows/, not the repo)
+IMPLEMENTATION_SPEC*.md
+TEST_COVERAGE*.md
+ORCHESTRATOR_STATE.md
+TASK_PLAN.md
