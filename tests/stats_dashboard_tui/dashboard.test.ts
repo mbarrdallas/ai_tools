@@ -10,8 +10,8 @@
  * - Basic shell layout
  */
 
-import { DashboardComponent } from '../../lib/stats_dashboard_tui/ui/dashboard';
-import { Agent, DashboardState } from '../../lib/stats_dashboard_tui/types';
+import { DashboardComponent } from '@shared/stats_dashboard_tui/ui/dashboard';
+import { Agent, DashboardState } from '@shared/stats_dashboard_tui/types';
 
 describe('DashboardComponent', () => {
   let mockStateManager: any;
@@ -615,7 +615,7 @@ describe('DashboardComponent', () => {
 
   describe('Overlay Configuration', () => {
     it('should export DASHBOARD_OVERLAY_CONFIG', () => {
-      const { DASHBOARD_OVERLAY_CONFIG } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DASHBOARD_OVERLAY_CONFIG } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       
       expect(DASHBOARD_OVERLAY_CONFIG).toBeDefined();
       expect(DASHBOARD_OVERLAY_CONFIG.anchor).toBe('right-center');

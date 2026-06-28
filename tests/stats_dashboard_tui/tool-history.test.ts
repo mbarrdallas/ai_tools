@@ -20,11 +20,11 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import type { ToolCall } from '@lib/stats_dashboard_tui/types';
+import type { ToolCall } from '@shared/stats_dashboard_tui/types';
 
 // Import component that will be implemented
 // This import will fail until tool-history.ts is created
-import { ToolHistory } from '@lib/stats_dashboard_tui/ui/tool-history';
+import { ToolHistory } from '@shared/stats_dashboard_tui/ui/tool-history';
 
 describe('ToolHistory Component', () => {
   // Helper function to create test tool calls
@@ -45,7 +45,7 @@ describe('ToolHistory Component', () => {
   }
 
   // Helper function to create mock agent with given tool calls
-  function createMockAgent(toolCalls: ToolCall[] = []): import('@lib/stats_dashboard_tui/types').Agent {
+  function createMockAgent(toolCalls: ToolCall[] = []): import('@shared/stats_dashboard_tui/types').Agent {
     return {
       id: 'agent-' + Math.random().toString(36).substring(7),
       name: 'test-agent',

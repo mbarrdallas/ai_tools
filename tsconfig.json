@@ -12,7 +12,8 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@lib/*": ["lib/*"]
+      "@lib/*": ["lib/*"],
+      "@shared/*": ["lib/shared/*"]
     }
   },
   "include": ["lib/**/*", "extensions/**/*", "tests/**/*"],

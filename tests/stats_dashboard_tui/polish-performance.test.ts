@@ -13,14 +13,14 @@
  * - Memory leak prevention on dismissal
  */
 
-import { DashboardComponent } from '../../lib/stats_dashboard_tui/ui/dashboard';
-import { StateManager } from '../../lib/stats_dashboard_tui/state/state-manager';
-import { TabBar } from '../../lib/stats_dashboard_tui/ui/tabs';
-import { AgentPanel } from '../../lib/stats_dashboard_tui/ui/agent-panel';
-import { MetricsDisplay } from '../../lib/stats_dashboard_tui/ui/metrics-display';
-import { ToolHistory } from '../../lib/stats_dashboard_tui/ui/tool-history';
-import { ConversationView } from '../../lib/stats_dashboard_tui/ui/conversation-view';
-import type { Agent, ToolCall, ConversationEntry } from '../../lib/stats_dashboard_tui/types';
+import { DashboardComponent } from '@shared/stats_dashboard_tui/ui/dashboard';
+import { StateManager } from '@shared/stats_dashboard_tui/state/state-manager';
+import { TabBar } from '@shared/stats_dashboard_tui/ui/tabs';
+import { AgentPanel } from '@shared/stats_dashboard_tui/ui/agent-panel';
+import { MetricsDisplay } from '@shared/stats_dashboard_tui/ui/metrics-display';
+import { ToolHistory } from '@shared/stats_dashboard_tui/ui/tool-history';
+import { ConversationView } from '@shared/stats_dashboard_tui/ui/conversation-view';
+import type { Agent, ToolCall, ConversationEntry } from '@shared/stats_dashboard_tui/types';
 
 describe('Polish and Performance (T16)', () => {
   let stateManager: StateManager;

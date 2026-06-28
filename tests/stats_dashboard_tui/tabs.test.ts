@@ -24,7 +24,7 @@ import type {
   Agent,
   AgentStatus,
   AgentMetrics,
-} from '@lib/stats_dashboard_tui/types';
+} from '@shared/stats_dashboard_tui/types';
 
 // Mock theme for testing
 const mockTheme = {

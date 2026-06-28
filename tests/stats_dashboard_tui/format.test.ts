@@ -26,7 +26,7 @@ import {
   formatToolArgs,
   truncateText,
   extractErrorMessage,
-} from '@lib/stats_dashboard_tui/utils/format';
+} from '@shared/stats_dashboard_tui/utils/format';
 
 describe('Formatting Utilities', () => {
   describe('formatTokens', () => {

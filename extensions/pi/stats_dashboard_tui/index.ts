@@ -7,10 +7,10 @@
  * This is the main extension file that Pi loads on session start.
  */
 
-import { StateManager } from '../../../lib/stats_dashboard_tui/state/state-manager';
-import { NotificationManager } from '../../../lib/stats_dashboard_tui/state/notification-manager';
-import { DashboardController } from '../../../lib/stats_dashboard_tui/ui/controller';
-import { registerEventHandlers, setDashboardHandle } from '../../../lib/stats_dashboard_tui/handlers/events';
+import { StateManager } from '../../../lib/shared/stats_dashboard_tui/state/state-manager';
+import { NotificationManager } from '../../../lib/shared/stats_dashboard_tui/state/notification-manager';
+import { DashboardController } from '../../../lib/shared/stats_dashboard_tui/ui/controller';
+import { registerEventHandlers, setDashboardHandle } from '../../../lib/shared/stats_dashboard_tui/handlers/events';
 
 /** Keyboard shortcut for toggling the dashboard */
 const SHORTCUT = 'ctrl+shift+s';

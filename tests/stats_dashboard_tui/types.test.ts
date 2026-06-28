@@ -28,7 +28,7 @@ import type {
   NotificationType,
   DashboardState,
   DataStore,
-} from '@lib/stats_dashboard_tui/types';
+} from '@shared/stats_dashboard_tui/types';
 
 describe('TypeScript Type Definitions', () => {
   describe('Type Exports', () => {

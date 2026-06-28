@@ -16,10 +16,10 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import type { Agent } from '@lib/stats_dashboard_tui/types';
-import { DashboardComponent } from '@lib/stats_dashboard_tui/ui/dashboard';
-import { DashboardController } from '@lib/stats_dashboard_tui/ui/controller';
-import type { StateManager } from '@lib/stats_dashboard_tui/state/state-manager';
+import type { Agent } from '@shared/stats_dashboard_tui/types';
+import { DashboardComponent } from '@shared/stats_dashboard_tui/ui/dashboard';
+import { DashboardController } from '@shared/stats_dashboard_tui/ui/controller';
+import type { StateManager } from '@shared/stats_dashboard_tui/state/state-manager';
 
 /**
  * Create a mock StateManager for testing

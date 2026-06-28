@@ -9,5 +9,6 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
+    '^@shared/(.*)$': '<rootDir>/lib/shared/$1',
   },
 };

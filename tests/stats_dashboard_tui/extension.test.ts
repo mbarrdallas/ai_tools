@@ -145,14 +145,14 @@ describe('Extension Entry Point', () => {
   describe('Extension Export Structure', () => {
     it('should export default object with extension metadata', async () => {
       // Dynamic import to avoid caching issues
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       expect(module.default).toBeDefined();
       expect(typeof module.default).toBe('object');
     });
 
     it('should export extension with name property', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       expect(module.default.name).toBeDefined();
       expect(typeof module.default.name).toBe('string');
@@ -160,7 +160,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should export extension with version property', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       expect(module.default.version).toBeDefined();
       expect(typeof module.default.version).toBe('string');
@@ -168,21 +168,21 @@ describe('Extension Entry Point', () => {
     });
 
     it('should export extension with activate function', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       expect(module.default.activate).toBeDefined();
       expect(typeof module.default.activate).toBe('function');
     });
 
     it('should export extension with deactivate function', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       expect(module.default.deactivate).toBeDefined();
       expect(typeof module.default.deactivate).toBe('function');
     });
 
     it('should have activate function that accepts Pi API parameter', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       // Check function signature - should accept one parameter
       expect(module.default.activate.length).toBe(1);
@@ -191,7 +191,7 @@ describe('Extension Entry Point', () => {
 
   describe('State Manager Initialization', () => {
     it('should initialize StateManager on activation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -207,7 +207,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should initialize StateManager before registering event handlers', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -220,7 +220,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should have functional StateManager after activation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -254,7 +254,7 @@ describe('Extension Entry Point', () => {
 
   describe('Notification Manager Initialization', () => {
     it('should initialize NotificationManager on activation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -289,7 +289,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should have functional NotificationManager for context warnings', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -326,7 +326,7 @@ describe('Extension Entry Point', () => {
 
   describe('Dashboard Controller Initialization', () => {
     it('should initialize DashboardController on activation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -335,7 +335,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register /stats command with DashboardController', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -349,7 +349,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register keyboard shortcut with DashboardController', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -363,7 +363,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should pass Pi context to DashboardController', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -380,7 +380,7 @@ describe('Extension Entry Point', () => {
 
   describe('Event Handler Registration', () => {
     it('should register agent_start event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -389,7 +389,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register agent_end event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -398,7 +398,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register message_end event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -407,7 +407,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register turn_start event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -416,7 +416,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register turn_end event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -425,7 +425,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register tool_execution_start event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -434,7 +434,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register tool_execution_end event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -443,7 +443,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register session_start event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -452,7 +452,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register session_shutdown event handler', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -461,7 +461,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register all required event handlers', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -485,7 +485,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register event handlers in correct order', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -501,7 +501,7 @@ describe('Extension Entry Point', () => {
 
   describe('Command Registration', () => {
     it('should register /stats command', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -509,7 +509,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register command with correct name', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -518,7 +518,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register command with description', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -529,7 +529,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register command with execute function', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -539,7 +539,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should execute command without errors', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -551,7 +551,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should toggle dashboard when command is executed', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -567,7 +567,7 @@ describe('Extension Entry Point', () => {
 
   describe('Keyboard Shortcut Registration', () => {
     it('should register Ctrl+Shift+S shortcut', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -575,7 +575,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register shortcut with correct key combination', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -584,7 +584,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register shortcut with description', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -595,7 +595,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should register shortcut with action function', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -605,7 +605,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should execute shortcut action without errors', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -617,7 +617,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should toggle dashboard when shortcut is triggered', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -633,7 +633,7 @@ describe('Extension Entry Point', () => {
 
   describe('Session Lifecycle', () => {
     it('should handle session_start event', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -645,7 +645,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should reset state on new session', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -666,7 +666,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should handle session_shutdown event', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -678,7 +678,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should close dashboard on session shutdown', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -699,14 +699,14 @@ describe('Extension Entry Point', () => {
 
   describe('Deactivation', () => {
     it('should provide deactivate function', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       expect(module.default.deactivate).toBeDefined();
       expect(typeof module.default.deactivate).toBe('function');
     });
 
     it('should execute deactivate without errors', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -716,7 +716,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should unregister command on deactivation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       await module.default.deactivate!();
@@ -726,7 +726,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should unregister shortcut on deactivation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       await module.default.deactivate!();
@@ -736,7 +736,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should close dashboard on deactivation', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -754,7 +754,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should handle deactivation when dashboard is not open', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -772,7 +772,7 @@ describe('Extension Entry Point', () => {
         commands: undefined,
       };
       
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await expect(async () => {
         await module.default.activate(incompletePi);
@@ -785,7 +785,7 @@ describe('Extension Entry Point', () => {
         shortcuts: undefined,
       };
       
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await expect(async () => {
         await module.default.activate(incompletePi);
@@ -800,7 +800,7 @@ describe('Extension Entry Point', () => {
         }),
       };
       
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       // Should either handle the error or throw it (but not crash)
       await expect(async () => {
@@ -819,7 +819,7 @@ describe('Extension Entry Point', () => {
         },
       };
       
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(errorPi);
       
@@ -832,7 +832,7 @@ describe('Extension Entry Point', () => {
 
   describe('Integration', () => {
     it('should successfully complete a full lifecycle', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       // Activate
       await module.default.activate(mockPi);
@@ -925,7 +925,7 @@ describe('Extension Entry Point', () => {
     });
 
     it('should maintain state across multiple command invocations', async () => {
-      const module = await import('@lib/stats_dashboard_tui/index');
+      const module = await import('@shared/stats_dashboard_tui/index');
       
       await module.default.activate(mockPi);
       
@@ -953,6 +953,7 @@ describe('Extension Entry Point', () => {
       const packageJsonPath = path.join(
         process.cwd(),
         'extensions',
+        'pi',
         'stats_dashboard_tui',
         'package.json'
       );
@@ -970,6 +971,7 @@ describe('Extension Entry Point', () => {
       const packageJsonPath = path.join(
         process.cwd(),
         'extensions',
+        'pi',
         'stats_dashboard_tui',
         'package.json'
       );
@@ -987,6 +989,7 @@ describe('Extension Entry Point', () => {
       const packageJsonPath = path.join(
         process.cwd(),
         'extensions',
+        'pi',
         'stats_dashboard_tui',
         'package.json'
       );

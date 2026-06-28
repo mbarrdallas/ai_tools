@@ -1,16 +1,16 @@
 {
-  "name": "stats-dashboard-tui",
+  "name": "stats_dashboard_tui",
   "version": "1.0.0",
   "description": "Real-time agent stats dashboard in a TUI overlay for Pi",
   "main": "index.ts",
   "keywords": ["pi-extension", "stats", "dashboard", "tui", "monitoring"],
   "author": "mbarrdallas",
   "license": "MIT",
-  "piExtension": {
-    "entry": "index.ts",
+  "pi": {
+    "extension": true,
     "displayName": "Stats Dashboard TUI",
     "description": "Monitor agent metrics, tool history, and conversations in real-time",
-    "commands": ["/stats"],
-    "shortcuts": ["ctrl+shift+s"]
+    "commands": ["stats"],
+    "shortcuts": ["Ctrl+Shift+S"]
   }
 }

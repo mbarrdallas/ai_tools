@@ -7,11 +7,11 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import type { Agent, AgentMetrics, DashboardState } from '../../lib/stats_dashboard_tui/types';
-import type { StateManager } from '../../lib/stats_dashboard_tui/state/state-manager';
-import type { DashboardComponent } from '../../lib/stats_dashboard_tui/ui/dashboard';
-import type { TabBar } from '../../lib/stats_dashboard_tui/ui/tabs';
-import type { AgentPanel } from '../../lib/stats_dashboard_tui/ui/agent-panel';
+import type { Agent, AgentMetrics, DashboardState } from '@shared/stats_dashboard_tui/types';
+import type { StateManager } from '@shared/stats_dashboard_tui/state/state-manager';
+import type { DashboardComponent } from '@shared/stats_dashboard_tui/ui/dashboard';
+import type { TabBar } from '@shared/stats_dashboard_tui/ui/tabs';
+import type { AgentPanel } from '@shared/stats_dashboard_tui/ui/agent-panel';
 
 /**
  * Create a mock agent for testing
@@ -95,7 +95,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -124,7 +124,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -153,7 +153,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -178,7 +178,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -206,7 +206,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -253,7 +253,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -281,7 +281,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -309,7 +309,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -342,7 +342,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -387,7 +387,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -414,7 +414,7 @@ describe('Dashboard Integration', () => {
       mockStateManager.getAllAgents.mockReturnValue([agent]);
       mockStateManager.getDashboardState.mockReturnValue(dashboardState);
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -438,7 +438,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -477,7 +477,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -506,7 +506,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -533,7 +533,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -559,7 +559,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -602,7 +602,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -634,7 +634,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -666,7 +666,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -701,7 +701,7 @@ describe('Dashboard Integration', () => {
       mockStateManager.getAllAgents.mockReturnValue([agent]);
       mockStateManager.getDashboardState.mockReturnValue(dashboardState);
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -725,7 +725,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
 
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       
       // Act - Create dashboard, render, then recreate
       const dashboard1 = new DashboardComponent({
@@ -757,7 +757,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -781,7 +781,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -813,7 +813,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -846,7 +846,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -876,7 +876,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -902,7 +902,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -928,7 +928,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -952,7 +952,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -980,7 +980,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1008,7 +1008,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1042,7 +1042,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1074,7 +1074,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1102,7 +1102,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1135,7 +1135,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1172,7 +1172,7 @@ describe('Dashboard Integration', () => {
       mockStateManager.getAllAgents.mockReturnValue([agent]);
       mockStateManager.getDashboardState.mockReturnValue(null);
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1200,7 +1200,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1222,7 +1222,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1259,7 +1259,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
@@ -1287,7 +1287,7 @@ describe('Dashboard Integration', () => {
         expandedSections: new Set(),
       });
       
-      const { DashboardComponent } = require('../../lib/stats_dashboard_tui/ui/dashboard');
+      const { DashboardComponent } = require('../../lib/shared/stats_dashboard_tui/ui/dashboard');
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,

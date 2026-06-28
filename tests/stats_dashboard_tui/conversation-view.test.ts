@@ -13,8 +13,8 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { ConversationView } from '../../lib/stats_dashboard_tui/ui/conversation-view';
-import { ConversationEntry, MessageRole } from '../../lib/stats_dashboard_tui/types';
+import { ConversationView } from '@shared/stats_dashboard_tui/ui/conversation-view';
+import { ConversationEntry, MessageRole } from '@shared/stats_dashboard_tui/types';
 
 describe('ConversationView', () => {
   let mockConversationEntries: ConversationEntry[];

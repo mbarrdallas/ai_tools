@@ -18,15 +18,15 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { TabBar } from '@lib/stats_dashboard_tui/ui/tabs';
-import { DashboardController } from '@lib/stats_dashboard_tui/ui/controller';
-import { StateManager } from '@lib/stats_dashboard_tui/state/state-manager';
+import { TabBar } from '@shared/stats_dashboard_tui/ui/tabs';
+import { DashboardController } from '@shared/stats_dashboard_tui/ui/controller';
+import { StateManager } from '@shared/stats_dashboard_tui/state/state-manager';
 import type {
   Agent,
   AgentStatus,
   AgentMetrics,
   ToolCall,
-} from '@lib/stats_dashboard_tui/types';
+} from '@shared/stats_dashboard_tui/types';
 
 /**
  * Mock theme for testing

@@ -20,11 +20,11 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Import types
-import type { AgentMetrics } from '@lib/stats_dashboard_tui/types';
+import type { AgentMetrics } from '@shared/stats_dashboard_tui/types';
 
 // Import component that will be implemented
 // This import will fail until metrics-display.ts is created
-import { MetricsDisplay } from '@lib/stats_dashboard_tui/ui/metrics-display';
+import { MetricsDisplay } from '@shared/stats_dashboard_tui/ui/metrics-display';
 
 describe('MetricsDisplay Component', () => {
   // Mock theme for color testing
@@ -34,7 +34,7 @@ describe('MetricsDisplay Component', () => {
   };
 
   // Helper function to create mock agent with given metrics
-  function createMockAgent(metrics: AgentMetrics): import('@lib/stats_dashboard_tui/types').Agent {
+  function createMockAgent(metrics: AgentMetrics): import('@shared/stats_dashboard_tui/types').Agent {
     return {
       id: 'agent-' + Math.random().toString(36).substring(7),
       name: 'test-agent',

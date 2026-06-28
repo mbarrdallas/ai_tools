@@ -24,7 +24,7 @@ import type {
   Agent,
   Notification,
   NotificationType,
-} from '@lib/stats_dashboard_tui/types';
+} from '@shared/stats_dashboard_tui/types';
 
 // Mock Pi context type
 interface MockContext {
@@ -41,8 +41,8 @@ interface NotifyOptions {
 
 // The NotificationManager implementation to be tested
 // This will be implemented by the Coder Agent
-import { NotificationManager } from '@lib/stats_dashboard_tui/state/notification-manager';
-import { StateManager } from '@lib/stats_dashboard_tui/state/state-manager';
+import { NotificationManager } from '@shared/stats_dashboard_tui/state/notification-manager';
+import { StateManager } from '@shared/stats_dashboard_tui/state/state-manager';
 
 describe('NotificationManager', () => {
   let notificationManager: NotificationManager;

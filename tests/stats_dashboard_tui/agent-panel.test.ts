@@ -16,9 +16,9 @@ import type {
   ConversationEntry,
   MessageRole,
   ToolCallStatus 
-} from '../../lib/stats_dashboard_tui/types';
+} from '@shared/stats_dashboard_tui/types';
 
-import { AgentPanel } from '../../lib/stats_dashboard_tui/ui/agent-panel';
+import { AgentPanel } from '@shared/stats_dashboard_tui/ui/agent-panel';
 
 // Mock theme interface for testing
 interface MockTheme {

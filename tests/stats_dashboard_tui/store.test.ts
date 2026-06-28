@@ -25,10 +25,10 @@ import type {
   AgentMetrics,
   ToolCall,
   ToolCallStatus,
-} from '@lib/stats_dashboard_tui/types';
+} from '@shared/stats_dashboard_tui/types';
 
 // The actual DataStore implementation
-import { DataStore } from '@lib/stats_dashboard_tui/state/store';
+import { DataStore } from '@shared/stats_dashboard_tui/state/store';
 
 describe('DataStore', () => {
   let store: DataStore;
