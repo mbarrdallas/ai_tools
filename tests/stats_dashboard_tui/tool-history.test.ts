@@ -44,40 +44,65 @@ describe('ToolHistory Component', () => {
     };
   }
 
+  // Helper function to create mock agent with given tool calls
+  function createMockAgent(toolCalls: ToolCall[] = []): import('@lib/stats_dashboard_tui/types').Agent {
+    return {
+      id: 'agent-' + Math.random().toString(36).substring(7),
+      name: 'test-agent',
+      status: 'running',
+      parentId: null,
+      startTime: Date.now(),
+      endTime: null,
+      metrics: {
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheReadTokens: 0,
+        cacheWriteTokens: 0,
+        totalCost: 0,
+        contextTokens: 0,
+        contextLimit: 128000,
+        turnCount: 0,
+      },
+      toolCalls,
+      messageCount: 0,
+      subagentIds: [],
+    };
+  }
+
   describe('Constructor and Basic Setup', () => {
     it('should create ToolHistory component with empty tool calls', () => {
-      const toolHistory = new ToolHistory({ toolCalls: [] });
+      const toolHistory = new ToolHistory({ agent: createMockAgent([]), theme: null, width: 80 });
       expect(toolHistory).toBeDefined();
     });
 
     it('should accept tool calls in constructor', () => {
       const toolCalls = [createToolCall()];
-      const toolHistory = new ToolHistory({ toolCalls });
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       expect(toolHistory).toBeDefined();
     });
 
     it('should accept width in constructor', () => {
-      const toolHistory = new ToolHistory({ toolCalls: [], width: 80 });
+      const toolHistory = new ToolHistory({ agent: createMockAgent([]), theme: null, width: 80 });
       expect(toolHistory).toBeDefined();
     });
 
     it('should accept height in constructor', () => {
-      const toolHistory = new ToolHistory({ toolCalls: [], height: 20 });
+      const toolHistory = new ToolHistory({ agent: createMockAgent([]), theme: null, width: 80 });
       expect(toolHistory).toBeDefined();
     });
   });
 
   describe('Empty State Handling', () => {
     it('should display empty state message when no tool calls', () => {
-      const toolHistory = new ToolHistory({ toolCalls: [] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('No tool calls yet');
     });
 
     it('should not show tool list when empty', () => {
-      const toolHistory = new ToolHistory({ toolCalls: [] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should not contain any tool icons
       expect(output).not.toContain('⏳');
@@ -86,8 +111,8 @@ describe('ToolHistory Component', () => {
     });
 
     it('should display friendly empty message', () => {
-      const toolHistory = new ToolHistory({ toolCalls: [] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Message should be informative and friendly
       expect(output.toLowerCase()).toContain('no tool');
@@ -100,8 +125,8 @@ describe('ToolHistory Component', () => {
         toolName: 'bash',
         argsSummary: 'npm install',
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('bash');
       expect(output).toContain('npm install');
@@ -113,8 +138,8 @@ describe('ToolHistory Component', () => {
         createToolCall({ toolName: 'read', argsSummary: 'file.txt' }),
         createToolCall({ toolName: 'write', argsSummary: 'output.txt (100 chars)' }),
       ];
-      const toolHistory = new ToolHistory({ toolCalls });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('bash');
       expect(output).toContain('read');
@@ -123,8 +148,8 @@ describe('ToolHistory Component', () => {
 
     it('should render tool names prominently', () => {
       const toolCall = createToolCall({ toolName: 'important_tool' });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Tool name should appear (exact styling TBD by implementation)
       expect(output).toContain('important_tool');
@@ -134,8 +159,8 @@ describe('ToolHistory Component', () => {
       const toolCall = createToolCall({
         argsSummary: 'echo "hello world"',
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('echo "hello world"');
     });
@@ -143,8 +168,8 @@ describe('ToolHistory Component', () => {
     it('should truncate long args summaries', () => {
       const longArgs = 'a'.repeat(200);
       const toolCall = createToolCall({ argsSummary: longArgs });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should contain truncated version (exact truncation length TBD)
       expect(output).toContain('...');
@@ -158,8 +183,8 @@ describe('ToolHistory Component', () => {
         createToolCall({ id: 'tool2', toolName: 'second', startTime: 2000 }),
         createToolCall({ id: 'tool3', toolName: 'third', startTime: 3000 }),
       ];
-      const toolHistory = new ToolHistory({ toolCalls });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Newest (third) should appear before oldest (first)
       const thirdIndex = output.indexOf('third');
@@ -176,10 +201,10 @@ describe('ToolHistory Component', () => {
         createToolCall({ id: 'tool1', toolName: 'tool_a', startTime: timestamp }),
         createToolCall({ id: 'tool2', toolName: 'tool_b', startTime: timestamp }),
       ];
-      const toolHistory = new ToolHistory({ toolCalls });
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Should not throw error
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle unsorted input and sort correctly', () => {
@@ -188,8 +213,8 @@ describe('ToolHistory Component', () => {
         createToolCall({ toolName: 'newest', startTime: 3000 }),
         createToolCall({ toolName: 'oldest', startTime: 1000 }),
       ];
-      const toolHistory = new ToolHistory({ toolCalls });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should be sorted newest first
       const newestIndex = output.indexOf('newest');
@@ -208,8 +233,8 @@ describe('ToolHistory Component', () => {
         endTime: null,
         duration: null,
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('⏳');
     });
@@ -219,8 +244,8 @@ describe('ToolHistory Component', () => {
         status: 'success',
         isError: false,
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('✓');
     });
@@ -231,8 +256,8 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: 'Command not found',
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('✗');
     });
@@ -243,8 +268,8 @@ describe('ToolHistory Component', () => {
         createToolCall({ status: 'success', isError: false }),
         createToolCall({ status: 'failed', isError: true, errorMessage: 'Error' }),
       ];
-      const toolHistory = new ToolHistory({ toolCalls });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('⏳');
       expect(output).toContain('✓');
@@ -256,8 +281,8 @@ describe('ToolHistory Component', () => {
         status: 'success',
         toolName: 'bash',
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Icon should appear before tool name in output
       const iconIndex = output.indexOf('✓');
@@ -274,8 +299,8 @@ describe('ToolHistory Component', () => {
         status: 'success',
         duration: 2500,
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should contain formatted duration (e.g., "2.5s")
       expect(output).toMatch(/2\.5s|2500ms/);
@@ -287,8 +312,8 @@ describe('ToolHistory Component', () => {
         duration: null,
         endTime: null,
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should not show a duration since it's still running
       expect(output).not.toMatch(/\d+ms/);
@@ -302,8 +327,8 @@ describe('ToolHistory Component', () => {
         duration: 150,
         errorMessage: 'Command failed',
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Failed calls still show duration
       expect(output).toContain('150ms');
@@ -318,8 +343,8 @@ describe('ToolHistory Component', () => {
           status: 'success',
         })
       );
-      const toolHistory = new ToolHistory({ toolCalls });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should use formatDuration utility
       expect(output).toContain('50ms');
@@ -335,8 +360,8 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: 'Tool execution failed',
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should contain ANSI color codes or theme color markers
       // Exact format depends on implementation, but should be visually distinct
@@ -354,8 +379,8 @@ describe('ToolHistory Component', () => {
           errorMessage: 'Error',
         }),
       ];
-      const toolHistory = new ToolHistory({ toolCalls });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Both should appear but with different styling
       expect(output).toContain('good');
@@ -371,8 +396,8 @@ describe('ToolHistory Component', () => {
         endTime: null,
         duration: null,
       });
-      const toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      const toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('⏳');
       expect(output).not.toContain('✗');
@@ -393,25 +418,25 @@ describe('ToolHistory Component', () => {
           status: 'success',
         }),
       ];
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
     });
 
     it('should collapse details by default', () => {
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Should show summary, not full args
       expect(output).toContain('ls -la /home/user');
     });
 
     it('should toggle details when "e" key is pressed', () => {
-      const beforeExpand = toolHistory.render(80);
+      const beforeExpand = toolHistory.render();
       
       // Simulate 'e' key press
       const handled = toolHistory.handleInput({ key: 'e' });
       
       expect(handled).toBe(true);
       
-      const afterExpand = toolHistory.render(80);
+      const afterExpand = toolHistory.render();
       
       // Output should change after expand
       expect(afterExpand).not.toBe(beforeExpand);
@@ -427,11 +452,11 @@ describe('ToolHistory Component', () => {
         },
         argsSummary: '/very/long/path/to/some/file.txt (offset: 100, limit: 50)',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       // Expand details
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Should show full args when expanded
       expect(output).toContain('path');
@@ -443,11 +468,11 @@ describe('ToolHistory Component', () => {
     it('should collapse when "e" is pressed again', () => {
       // First expand
       toolHistory.handleInput({ key: 'e' });
-      const expanded = toolHistory.render(80);
+      const expanded = toolHistory.render();
       
       // Then collapse
       toolHistory.handleInput({ key: 'e' });
-      const collapsed = toolHistory.render(80);
+      const collapsed = toolHistory.render();
       
       // Should return to collapsed state
       expect(collapsed).not.toBe(expanded);
@@ -458,11 +483,11 @@ describe('ToolHistory Component', () => {
         createToolCall({ id: 'tool1', toolName: 'first' }),
         createToolCall({ id: 'tool2', toolName: 'second' }),
       ];
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Select and expand first tool
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Only selected tool should be expanded
       // (Implementation detail: how selection works)
@@ -479,11 +504,11 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: 'ENOENT: no such file or directory',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       // Expand details
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       expect(output).toContain('ENOENT: no such file or directory');
     });
@@ -494,9 +519,9 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: 'File not found error message',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Error message should not appear in collapsed view
       expect(output).not.toContain('File not found error message');
@@ -508,10 +533,10 @@ describe('ToolHistory Component', () => {
         isError: false,
         errorMessage: null,
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Should not contain error-related text
       expect(output.toLowerCase()).not.toContain('error:');
@@ -523,10 +548,10 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: 'Command failed with exit code 1: Permission denied',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Error message should be displayed with proper formatting
       expect(output).toContain('Permission denied');
@@ -539,10 +564,10 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: longError,
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       // Should contain truncated or wrapped error
       expect(output).toContain('Error');
@@ -554,12 +579,12 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: null,
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       toolHistory.handleInput({ key: 'e' });
       
       // Should not throw error
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
   });
 
@@ -575,17 +600,17 @@ describe('ToolHistory Component', () => {
           argsSummary: `args for tool ${i}`,
         })
       );
-      toolHistory = new ToolHistory({ toolCalls, height: 10 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Should not throw error
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle scroll input', () => {
       const toolCalls = Array.from({ length: 30 }, (_, i) =>
         createToolCall({ id: `tool-${i}`, toolName: `tool_${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls, height: 10 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Simulate scroll down
       const handled = toolHistory.handleInput({ key: 'down' });
@@ -598,7 +623,7 @@ describe('ToolHistory Component', () => {
       const toolCalls = Array.from({ length: 20 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls, height: 5 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Should handle up/down arrows
       expect(toolHistory.handleInput({ key: 'down' })).toBe(true);
@@ -609,7 +634,7 @@ describe('ToolHistory Component', () => {
       const toolCalls = Array.from({ length: 20 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls, height: 5 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Should handle j/k for vi-style navigation
       expect(toolHistory.handleInput({ key: 'j' })).toBe(true);
@@ -618,15 +643,15 @@ describe('ToolHistory Component', () => {
 
     it('should not scroll beyond bounds', () => {
       const toolCalls = [createToolCall(), createToolCall()];
-      toolHistory = new ToolHistory({ toolCalls, height: 10 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Try to scroll up from top
       toolHistory.handleInput({ key: 'up' });
-      const atTop = toolHistory.render(80);
+      const atTop = toolHistory.render();
       
       // Try to scroll up again
       toolHistory.handleInput({ key: 'up' });
-      const stillAtTop = toolHistory.render(80);
+      const stillAtTop = toolHistory.render();
       
       // Should not change
       expect(stillAtTop).toBe(atTop);
@@ -636,8 +661,8 @@ describe('ToolHistory Component', () => {
       const toolCalls = Array.from({ length: 30 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls, height: 5 });
-      const output = toolHistory.render(80);
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should indicate more content available (e.g., "..." or scroll arrows)
       // Exact indicator TBD by implementation
@@ -648,17 +673,17 @@ describe('ToolHistory Component', () => {
       const toolCalls = Array.from({ length: 5 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls, height: 3 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Add more tool calls
       const newToolCalls = [
         ...toolCalls,
         createToolCall({ id: 'new-tool' }),
       ];
-      const newToolHistory = new ToolHistory({ toolCalls: newToolCalls, height: 3 });
+      const newToolHistory = new ToolHistory({ agent: createMockAgent(newToolCalls), theme: null, width: 80 });
       
       // Should handle updated list
-      expect(() => newToolHistory.render(80)).not.toThrow();
+      expect(() => newToolHistory.render()).not.toThrow();
     });
   });
 
@@ -674,28 +699,28 @@ describe('ToolHistory Component', () => {
     });
 
     it('should handle "e" key to expand details', () => {
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       const handled = toolHistory.handleInput({ key: 'e' });
       
       expect(handled).toBe(true);
     });
 
     it('should handle "E" (uppercase) key to expand details', () => {
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       const handled = toolHistory.handleInput({ key: 'E' });
       
       expect(handled).toBe(true);
     });
 
     it('should return false for unhandled keys', () => {
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       const handled = toolHistory.handleInput({ key: 'x' });
       
       expect(handled).toBe(false);
     });
 
     it('should not throw on invalid input', () => {
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       expect(() => toolHistory.handleInput({ key: null as any })).not.toThrow();
       expect(() => toolHistory.handleInput({} as any)).not.toThrow();
@@ -705,7 +730,7 @@ describe('ToolHistory Component', () => {
       const manyToolCalls = Array.from({ length: 20 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls: manyToolCalls, height: 5 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(manyToolCalls), theme: null, width: 80 });
       
       expect(toolHistory.handleInput({ key: 'j' })).toBe(true);
       expect(toolHistory.handleInput({ key: 'k' })).toBe(true);
@@ -717,7 +742,7 @@ describe('ToolHistory Component', () => {
       const manyToolCalls = Array.from({ length: 50 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls: manyToolCalls, height: 10 });
+      toolHistory = new ToolHistory({ agent: createMockAgent(manyToolCalls), theme: null, width: 80 });
       
       const handlePageDown = toolHistory.handleInput({ key: 'pagedown' });
       const handlePageUp = toolHistory.handleInput({ key: 'pageup' });
@@ -732,10 +757,10 @@ describe('ToolHistory Component', () => {
 
     it('should cache render output when state unchanged', () => {
       const toolCalls = [createToolCall()];
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
-      const output1 = toolHistory.render(80);
-      const output2 = toolHistory.render(80);
+      const output1 = toolHistory.render();
+      const output2 = toolHistory.render();
       
       // Should return same output when nothing changed
       expect(output1).toBe(output2);
@@ -743,14 +768,14 @@ describe('ToolHistory Component', () => {
 
     it('should invalidate cache when state changes', () => {
       const toolCalls = [createToolCall()];
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
-      const beforeExpand = toolHistory.render(80);
+      const beforeExpand = toolHistory.render();
       
       // Change state
       toolHistory.handleInput({ key: 'e' });
       
-      const afterExpand = toolHistory.render(80);
+      const afterExpand = toolHistory.render();
       
       // Output should differ
       expect(afterExpand).not.toBe(beforeExpand);
@@ -760,13 +785,13 @@ describe('ToolHistory Component', () => {
       const toolCalls = Array.from({ length: 100 }, (_, i) =>
         createToolCall({ id: `tool-${i}` })
       );
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       const startTime = Date.now();
       
       // Render multiple times
       for (let i = 0; i < 10; i++) {
-        toolHistory.render(80);
+        toolHistory.render();
       }
       
       const endTime = Date.now();
@@ -783,11 +808,11 @@ describe('ToolHistory Component', () => {
     it('should adapt to different widths', () => {
       const toolCalls = [createToolCall()];
       
-      const narrow = new ToolHistory({ toolCalls });
-      const wide = new ToolHistory({ toolCalls });
+      const narrow = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
+      const wide = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
-      const narrowOutput = narrow.render(40);
-      const wideOutput = wide.render(120);
+      const narrowOutput = narrow.render();
+      const wideOutput = wide.render();
       
       // Both should render without error
       expect(narrowOutput).toBeDefined();
@@ -799,9 +824,9 @@ describe('ToolHistory Component', () => {
         toolName: 'very_long_tool_name_that_exceeds_width',
         argsSummary: 'this is a very long argument summary that should be truncated',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 40 });
       
-      const output = toolHistory.render(40);
+      const output = toolHistory.render();
       
       // No line should exceed specified width
       const lines = output.split('\n');
@@ -814,18 +839,18 @@ describe('ToolHistory Component', () => {
 
     it('should handle very narrow width gracefully', () => {
       const toolCalls = [createToolCall()];
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Should not throw with narrow width
-      expect(() => toolHistory.render(20)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle very wide width', () => {
       const toolCalls = [createToolCall()];
-      toolHistory = new ToolHistory({ toolCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(toolCalls), theme: null, width: 80 });
       
       // Should not throw with wide width
-      expect(() => toolHistory.render(200)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
   });
 
@@ -838,36 +863,36 @@ describe('ToolHistory Component', () => {
         status: 'success',
       } as any;
       
-      toolHistory = new ToolHistory({ toolCalls: [incompleteToolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([incompleteToolCall]), theme: null, width: 80 });
       
       // Should not throw error
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle null toolCalls array', () => {
-      expect(() => new ToolHistory({ toolCalls: null as any })).not.toThrow();
+      expect(() => new ToolHistory({ agent: null as any, theme: null, width: 80 })).toThrow();
     });
 
     it('should handle undefined toolCalls array', () => {
-      expect(() => new ToolHistory({ toolCalls: undefined as any })).not.toThrow();
+      expect(() => new ToolHistory({ agent: undefined as any, theme: null, width: 80 })).toThrow();
     });
 
     it('should handle tool call with very long ID', () => {
       const toolCall = createToolCall({
         id: 'x'.repeat(500),
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle tool call with special characters in name', () => {
       const toolCall = createToolCall({
         toolName: 'tool<>{}[]()!@#$%^&*',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       expect(output).toBeDefined();
     });
 
@@ -876,9 +901,9 @@ describe('ToolHistory Component', () => {
         toolName: 'bash',
         argsSummary: 'echo "Hello 世界 🌍"',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       expect(output).toContain('世界');
       expect(output).toContain('🌍');
     });
@@ -887,28 +912,28 @@ describe('ToolHistory Component', () => {
       const toolCall = createToolCall({
         duration: -100,
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       // Should handle gracefully (treat as 0 or show as invalid)
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle tool call with future startTime', () => {
       const toolCall = createToolCall({
         startTime: Date.now() + 100000,
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
-      expect(() => toolHistory.render(80)).not.toThrow();
+      expect(() => toolHistory.render()).not.toThrow();
     });
 
     it('should handle empty args summary', () => {
       const toolCall = createToolCall({
         argsSummary: '',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       expect(output).toBeDefined();
     });
   });
@@ -921,8 +946,8 @@ describe('ToolHistory Component', () => {
         duration: 2500,
         status: 'success',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should match formatDuration output
       expect(output).toContain('2.5s');
@@ -934,8 +959,8 @@ describe('ToolHistory Component', () => {
         args: { command: 'npm test' },
         argsSummary: 'npm test', // Pre-formatted
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       expect(output).toContain('npm test');
     });
@@ -946,10 +971,10 @@ describe('ToolHistory Component', () => {
         isError: true,
         errorMessage: 'Command failed: File not found',
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
       
       toolHistory.handleInput({ key: 'e' });
-      const output = toolHistory.render(80);
+      const output = toolHistory.render();
       
       expect(output).toContain('File not found');
     });
@@ -959,8 +984,8 @@ describe('ToolHistory Component', () => {
       const toolCall = createToolCall({
         argsSummary: longSummary,
       });
-      toolHistory = new ToolHistory({ toolCalls: [toolCall] });
-      const output = toolHistory.render(80);
+      toolHistory = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const output = toolHistory.render();
       
       // Should be truncated with ellipsis
       expect(output).toContain('...');
@@ -972,17 +997,17 @@ describe('ToolHistory Component', () => {
 
     it('should support updating tool calls list', () => {
       const initialCalls = [createToolCall({ id: 'tool1' })];
-      toolHistory = new ToolHistory({ toolCalls: initialCalls });
+      toolHistory = new ToolHistory({ agent: createMockAgent(initialCalls), theme: null, width: 80 });
       
-      const initialOutput = toolHistory.render(80);
+      const initialOutput = toolHistory.render();
       
       // Update with new list
       const updatedCalls = [
         ...initialCalls,
         createToolCall({ id: 'tool2' }),
       ];
-      const newToolHistory = new ToolHistory({ toolCalls: updatedCalls });
-      const updatedOutput = newToolHistory.render(80);
+      const newToolHistory = new ToolHistory({ agent: createMockAgent(updatedCalls), theme: null, width: 80 });
+      const updatedOutput = newToolHistory.render();
       
       // Output should reflect new tool call
       expect(updatedOutput).not.toBe(initialOutput);
@@ -995,8 +1020,8 @@ describe('ToolHistory Component', () => {
         endTime: null,
         duration: null,
       });
-      const pending = new ToolHistory({ toolCalls: [toolCall] });
-      const pendingOutput = pending.render(80);
+      const pending = new ToolHistory({ agent: createMockAgent([toolCall]), theme: null, width: 80 });
+      const pendingOutput = pending.render();
       
       expect(pendingOutput).toContain('⏳');
       
@@ -1007,8 +1032,8 @@ describe('ToolHistory Component', () => {
         endTime: Date.now(),
         duration: 1000,
       };
-      const completed = new ToolHistory({ toolCalls: [completedCall] });
-      const completedOutput = completed.render(80);
+      const completed = new ToolHistory({ agent: createMockAgent([completedCall]), theme: null, width: 80 });
+      const completedOutput = completed.render();
       
       expect(completedOutput).toContain('✓');
       expect(completedOutput).not.toContain('⏳');

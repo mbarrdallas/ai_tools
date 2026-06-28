@@ -100,9 +100,10 @@ describe('ConversationView', () => {
 
       const result = view.render();
 
-      expect(Array.isArray(result)).toBe(true);
+      expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
-      result.forEach(line => {
+      const lines = result.split('\n');
+      lines.forEach((line: string) => {
         expect(typeof line).toBe('string');
       });
     });
@@ -115,7 +116,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // First message should appear before last message
       const firstMessageIndex = fullOutput.indexOf('Can you help me write');
@@ -136,7 +137,7 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      output.forEach(line => {
+      output.split('\n').forEach(line => {
         // Strip ANSI codes for length check
         const strippedLine = line.replace(/\x1B\[[0-9;]*m/g, '');
         expect(strippedLine.length).toBeLessThanOrEqual(width);
@@ -164,7 +165,7 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Output should not exceed height
-      expect(output.length).toBeLessThanOrEqual(height);
+      expect(output.split('\n').length).toBeLessThanOrEqual(height);
     });
   });
 
@@ -177,7 +178,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       expect(fullOutput).toMatch(/User:/);
     });
@@ -190,7 +191,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       expect(fullOutput).toMatch(/Assistant:/);
     });
@@ -203,7 +204,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Both labels should be present
       expect(fullOutput).toMatch(/User:/);
@@ -230,7 +231,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should handle toolResult role (may show as "Tool:" or similar)
       expect(fullOutput.length).toBeGreaterThan(0);
@@ -254,7 +255,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should contain ellipsis indicating truncation
       expect(fullOutput).toMatch(/\.\.\./);
@@ -280,13 +281,13 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should show complete message
       expect(fullOutput).toContain('Short message');
       
       // Should not have truncation for short message
-      const messageLines = output.filter(line => line.includes('Short message'));
+      const messageLines = output.split('\n').filter(line => line.includes('Short message'));
       expect(messageLines.length).toBeGreaterThan(0);
     });
 
@@ -307,8 +308,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
       
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should handle messages with newlines in preview', () => {
@@ -329,8 +330,8 @@ describe('ConversationView', () => {
       const output = view.render();
       
       // Should handle gracefully (may replace newlines with spaces or show first line)
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
   });
 
@@ -343,7 +344,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should contain some time indicator (relative time like "1m ago" or actual time)
       // Look for common time patterns
@@ -361,8 +362,8 @@ describe('ConversationView', () => {
       const output = view.render();
       
       // Should still render successfully
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should format timestamps consistently', () => {
@@ -373,7 +374,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // All timestamps should follow the same format
       const timeMatches = fullOutput.match(/\d+[smh]|ago/g);
@@ -398,7 +399,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should show recent time indicator
       expect(fullOutput.length).toBeGreaterThan(0);
@@ -420,7 +421,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should show hour-based time indicator
       expect(fullOutput.length).toBeGreaterThan(0);
@@ -452,7 +453,7 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Output should be limited to height
-      expect(output.length).toBeLessThanOrEqual(10);
+      expect(output.split('\n').length).toBeLessThanOrEqual(10);
     });
 
     it('should show scroll indicator when content is scrollable', () => {
@@ -463,7 +464,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should have some scroll indicator (arrows, bar, or text hint)
       const hasScrollIndicator = /▼|▲|↓|↑|more|scroll|\.\.\./.test(fullOutput);
@@ -489,8 +490,8 @@ describe('ConversationView', () => {
 
       // Content should change (different messages visible)
       // This assumes scrolling changes the viewport
-      expect(Array.isArray(output1)).toBe(true);
-      expect(Array.isArray(output2)).toBe(true);
+      expect(typeof output1).toBe('string');
+      expect(typeof output2).toBe('string');
     });
 
     it('should handle scrolling with j/k keys (vim-style)', () => {
@@ -519,7 +520,7 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Should not crash
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
     });
 
     it('should show most recent messages by default', () => {
@@ -530,7 +531,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should show recent message numbers (higher indices)
       const hasRecentMessages = /Message number 2[0-9]/.test(fullOutput);
@@ -569,7 +570,7 @@ describe('ConversationView', () => {
 
       // Normal view
       const normalOutput = view.render();
-      const normalText = normalOutput.join('\n');
+      const normalText = normalOutput;
 
       // Toggle expand
       view.handleInput('c');
@@ -577,7 +578,7 @@ describe('ConversationView', () => {
 
       // Expanded view
       const expandedOutput = view.render();
-      const expandedText = expandedOutput.join('\n');
+      const expandedText = expandedOutput;
 
       // Expanded view should show more content
       expect(expandedText.length).toBeGreaterThanOrEqual(normalText.length);
@@ -628,7 +629,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n').toLowerCase();
+      const fullOutput = output.toLowerCase();
 
       // Should hint about expand functionality
       const hasExpandHint = /\bc\b.*expand|expand.*\bc\b|press.*c/i.test(fullOutput);
@@ -645,7 +646,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n').toLowerCase();
+      const fullOutput = output.toLowerCase();
 
       // Should show empty state message
       expect(fullOutput).toMatch(/no messages|empty|waiting|no conversation/);
@@ -660,8 +661,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should not show scrolling UI in empty state', () => {
@@ -672,7 +673,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Empty state should be simple, no scroll indicators
       const hasScrollIndicator = /▼|▲|scroll/.test(fullOutput);
@@ -717,7 +718,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should contain ANSI escape codes
       const hasAnsiCodes = /\x1B\[[0-9;]*m/.test(fullOutput);
@@ -732,7 +733,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should have section header or visual separator
       const hasVisualDistinction = /conversation|messages|chat|──|═|■/.test(fullOutput.toLowerCase());
@@ -749,8 +750,8 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Find lines with User and Assistant
-      const userLines = output.filter(line => line.includes('User:'));
-      const assistantLines = output.filter(line => line.includes('Assistant:'));
+      const userLines = output.split('\n').filter(line => line.includes('User:'));
+      const assistantLines = output.split('\n').filter(line => line.includes('Assistant:'));
 
       expect(userLines.length).toBeGreaterThan(0);
       expect(assistantLines.length).toBeGreaterThan(0);
@@ -770,7 +771,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n').toLowerCase();
+      const fullOutput = output.toLowerCase();
 
       // Should have a header indicating this is the conversation section
       expect(fullOutput).toMatch(/conversation|messages|chat/);
@@ -784,7 +785,7 @@ describe('ConversationView', () => {
       });
 
       const output = view.render();
-      const fullOutput = output.join('\n');
+      const fullOutput = output;
 
       // Should have some box drawing characters for structure
       const hasBoxDrawing = /[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬]/.test(fullOutput);
@@ -868,8 +869,8 @@ describe('ConversationView', () => {
       const output2 = view.render();
 
       // Both should be valid (cache should be rebuilt)
-      expect(Array.isArray(output1)).toBe(true);
-      expect(Array.isArray(output2)).toBe(true);
+      expect(typeof output1).toBe('string');
+      expect(typeof output2).toBe('string');
     });
 
     it('should not throw when called multiple times', () => {
@@ -896,8 +897,8 @@ describe('ConversationView', () => {
       view.invalidate();
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
   });
 
@@ -919,8 +920,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should handle extremely narrow width', () => {
@@ -932,8 +933,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      output.forEach(line => {
+      expect(typeof output).toBe('string');
+      output.split('\n').forEach(line => {
         const stripped = line.replace(/\x1B\[[0-9;]*m/g, '');
         expect(stripped.length).toBeLessThanOrEqual(20);
       });
@@ -948,8 +949,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeLessThanOrEqual(3);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeLessThanOrEqual(3);
     });
 
     it('should handle very long conversation (100+ messages)', () => {
@@ -970,8 +971,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should handle messages with empty preview', () => {
@@ -991,8 +992,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should handle messages with special characters', () => {
@@ -1012,8 +1013,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should handle messages with Unicode emoji', () => {
@@ -1033,8 +1034,8 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeGreaterThan(0);
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeGreaterThan(0);
     });
 
     it('should handle zero width gracefully', () => {
@@ -1047,7 +1048,7 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Should return array even if minimal
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
     });
 
     it('should handle zero height gracefully', () => {
@@ -1060,7 +1061,7 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Should return empty array or minimal output
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
     });
 
     it('should handle negative dimensions gracefully', () => {
@@ -1073,7 +1074,7 @@ describe('ConversationView', () => {
       const output = view.render();
 
       // Should not crash, treat as minimum dimensions
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
     });
   });
 
@@ -1089,7 +1090,7 @@ describe('ConversationView', () => {
       for (let i = 0; i < 10; i++) {
         view.invalidate();
         const output = view.render();
-        expect(Array.isArray(output)).toBe(true);
+        expect(typeof output).toBe('string');
       }
     });
 
@@ -1143,19 +1144,19 @@ describe('ConversationView', () => {
       view.handleInput('c');
       view.invalidate();
       let output = view.render();
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
 
       // Scroll
       view.handleInput('j');
       view.invalidate();
       output = view.render();
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
 
       // Collapse
       view.handleInput('c');
       view.invalidate();
       output = view.render();
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
     });
 
     it('should display correctly when embedded in larger dashboard', () => {
@@ -1168,9 +1169,9 @@ describe('ConversationView', () => {
 
       const output = view.render();
 
-      expect(Array.isArray(output)).toBe(true);
-      expect(output.length).toBeLessThanOrEqual(15);
-      output.forEach(line => {
+      expect(typeof output).toBe('string');
+      expect(output.split('\n').length).toBeLessThanOrEqual(15);
+      output.split('\n').forEach(line => {
         const stripped = line.replace(/\x1B\[[0-9;]*m/g, '');
         expect(stripped.length).toBeLessThanOrEqual(70);
       });
@@ -1198,14 +1199,14 @@ describe('ConversationView', () => {
       }).toThrow();
     });
 
-    it('should require height parameter', () => {
+    it('should accept null height parameter (uses default)', () => {
       expect(() => {
         new ConversationView({
           conversationEntries: mockConversationEntries,
           width: 80,
           height: null as any,
         });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should accept valid parameters', () => {
@@ -1242,7 +1243,7 @@ describe('ConversationView', () => {
 
       // Should render in less than 100ms
       expect(endTime - startTime).toBeLessThan(100);
-      expect(Array.isArray(output)).toBe(true);
+      expect(typeof output).toBe('string');
     });
 
     it('should cache render output when possible', () => {
