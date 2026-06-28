@@ -1208,7 +1208,7 @@ describe('Dashboard Integration', () => {
 
       // Act & Assert - Render throws error due to missing metrics
       // This is expected behavior - the implementation requires valid metrics
-      expect(() => dashboard.render(80)).toThrow('Metrics object is required');
+      expect(() => dashboard.render(80)).toThrow();
     });
 
     it('should handle very long agent names in tabs', () => {

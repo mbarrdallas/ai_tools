@@ -543,7 +543,7 @@ export function registerEventHandlers(
 
   // Agent lifecycle events
   pi.on('agent_start', async (event: AgentStartEvent, ctx: PiContext) => {
-    await handleAgentStart(event, ctx);
+    return await handleAgentStart(event, ctx);
   });
 
   pi.on('agent_end', async (event: AgentEndEvent, ctx: PiContext) => {

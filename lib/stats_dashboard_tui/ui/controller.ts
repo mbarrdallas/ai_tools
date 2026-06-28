@@ -48,6 +48,7 @@ export class DashboardController {
   private ctx: PiContext | null = null;
   private dashboardHandle: any = null;
   private visible: boolean = false;
+  private visibilityListeners: Array<() => void> = [];
 
   /**
    * Create a new DashboardController
@@ -129,6 +130,7 @@ export class DashboardController {
       });
 
       this.visible = true;
+      this.visibilityListeners.forEach(fn => fn());
     } catch (error) {
       console.error('DashboardController: failed to show dashboard', error);
       this.dashboardHandle = null;
@@ -166,6 +168,7 @@ export class DashboardController {
     }
 
     this.visible = false;
+    this.visibilityListeners.forEach(fn => fn());
   }
 
   /**
@@ -278,11 +281,43 @@ export class DashboardController {
   }
 
   /**
+   * Register a listener called whenever dashboard visibility changes.
+   *
+   * @param fn - Callback invoked on show/hide
+   * @returns Unsubscribe function
+   */
+  onVisibilityChange(fn: () => void): () => void {
+    this.visibilityListeners.push(fn);
+    return () => {
+      this.visibilityListeners = this.visibilityListeners.filter(l => l !== fn);
+    };
+  }
+
+  /**
+   * Request a re-render of the dashboard if it is currently visible.
+   * Called by event handlers when state changes.
+   */
+  requestRender(): void {
+    if (this.visible && this.dashboardHandle) {
+      try {
+        if (typeof this.dashboardHandle.requestRender === 'function') {
+          this.dashboardHandle.requestRender();
+        } else if (typeof this.dashboardHandle.render === 'function') {
+          this.dashboardHandle.render();
+        }
+      } catch {
+        // Silently ignore render errors
+      }
+    }
+  }
+
+  /**
    * Cleanup method called on extension shutdown
-   * 
+   *
    * Ensures dashboard is hidden and resources are released.
    */
   dispose(): void {
+    this.visibilityListeners = [];
     this.hide();
     this.ctx = null;
   }
