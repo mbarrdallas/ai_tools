@@ -240,18 +240,46 @@ describe('DashboardComponent', () => {
       expect(onCloseMock).toHaveBeenCalled();
     });
 
-    it('should not trigger onClose on non-Escape keys', () => {
+    it('should not trigger onClose on non-Escape/non-q keys', () => {
       const dashboard = new DashboardComponent({
         stateManager: mockStateManager,
         controller: mockController,
         onClose: onCloseMock,
       });
 
+      // Test various keys that should NOT close dashboard
       dashboard.handleInput('a');
-      dashboard.handleInput('q');
+      dashboard.handleInput('z');
       dashboard.handleInput('\n');
+      dashboard.handleInput(' ');
 
       expect(onCloseMock).not.toHaveBeenCalled();
+    });
+
+    it('should trigger onClose when q key is pressed', () => {
+      const dashboard = new DashboardComponent({
+        stateManager: mockStateManager,
+        controller: mockController,
+        onClose: onCloseMock,
+      });
+
+      dashboard.handleInput('q');
+
+      expect(onCloseMock).toHaveBeenCalled();
+      expect(onCloseMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should trigger onClose when Q key is pressed', () => {
+      const dashboard = new DashboardComponent({
+        stateManager: mockStateManager,
+        controller: mockController,
+        onClose: onCloseMock,
+      });
+
+      dashboard.handleInput('Q');
+
+      expect(onCloseMock).toHaveBeenCalled();
+      expect(onCloseMock).toHaveBeenCalledTimes(1);
     });
 
     it('should not trigger onClose on arrow keys', () => {

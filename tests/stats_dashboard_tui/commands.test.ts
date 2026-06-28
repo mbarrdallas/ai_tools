@@ -1,27 +1,24 @@
 /**
  * Commands and Shortcuts Test Suite
  * 
- * Tests for dashboard keyboard commands and shortcuts (Task T14)
+ * Tests for Task T14: External Dashboard Control
  * 
- * The dashboard must handle global commands that work from any focused component:
+ * T14 Requirements:
+ * - DashboardController class with toggle/show/hide/isVisible methods
+ * - Footer status showing "📊 N agents" when dashboard is closed
+ * - Hooks for /stats command and Ctrl+Shift+S registration (actual registration in T17)
+ * - State persists during session
+ * 
+ * Also includes tests for internal dashboard keyboard shortcuts:
  * - 'r' key: refresh/re-render dashboard by invalidating cache
  * - '?' key: toggle help overlay showing all keyboard shortcuts
  * - 'q' key: close dashboard (same as ESC)
- * - Help overlay: display all available shortcuts
- * - Input consumption: handled commands should not pass through
- * 
- * Acceptance Criteria:
- * - 'r' key refreshes/re-renders dashboard
- * - '?' key toggles help overlay showing shortcuts
- * - 'q' key closes dashboard (same as ESC)
- * - Help overlay lists all keyboard shortcuts
- * - Commands work from any focused component
- * - Input consumed (not passed through) when command handled
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { Agent } from '@lib/stats_dashboard_tui/types';
 import { DashboardComponent } from '@lib/stats_dashboard_tui/ui/dashboard';
+import { DashboardController } from '@lib/stats_dashboard_tui/ui/controller';
 import type { StateManager } from '@lib/stats_dashboard_tui/state/state-manager';
 
 /**
@@ -78,7 +75,494 @@ function createMockAgent(id: string, name: string): Agent {
   };
 }
 
-describe('DashboardComponent - Commands and Shortcuts', () => {
+describe('DashboardController - External Control (T14)', () => {
+  let controller: DashboardController;
+  let mockStateManager: StateManager;
+  let mockCtx: any;
+
+  beforeEach(() => {
+    mockStateManager = createMockStateManager();
+    mockCtx = {
+      ui: {
+        custom: jest.fn(() => ({
+          close: jest.fn(),
+          dispose: jest.fn(),
+        })),
+      },
+      commands: {
+        register: jest.fn(() => 'cmd-id'),
+        unregister: jest.fn(),
+      },
+      shortcuts: {
+        register: jest.fn(() => 'shortcut-id'),
+        unregister: jest.fn(),
+      },
+    };
+
+    controller = new DashboardController({
+      stateManager: mockStateManager,
+      ctx: mockCtx,
+    });
+  });
+
+  describe('Constructor', () => {
+    it('should create controller with stateManager', () => {
+      expect(controller).toBeDefined();
+      expect(controller.isVisible()).toBe(false);
+    });
+
+    it('should throw error if stateManager is missing', () => {
+      expect(() => {
+        new DashboardController({} as any);
+      }).toThrow('DashboardController requires stateManager');
+    });
+
+    it('should accept optional ctx parameter', () => {
+      const controllerWithoutCtx = new DashboardController({
+        stateManager: mockStateManager,
+      });
+      expect(controllerWithoutCtx).toBeDefined();
+      expect(controllerWithoutCtx.isVisible()).toBe(false);
+    });
+  });
+
+  describe('toggle()', () => {
+    it('should show dashboard when currently hidden', () => {
+      // Arrange
+      expect(controller.isVisible()).toBe(false);
+
+      // Act
+      controller.toggle();
+
+      // Assert
+      expect(controller.isVisible()).toBe(true);
+      expect(mockCtx.ui.custom).toHaveBeenCalled();
+    });
+
+    it('should hide dashboard when currently visible', () => {
+      // Arrange: show dashboard first
+      controller.show();
+      expect(controller.isVisible()).toBe(true);
+
+      // Act
+      controller.toggle();
+
+      // Assert
+      expect(controller.isVisible()).toBe(false);
+    });
+
+    it('should toggle multiple times', () => {
+      // Start hidden
+      expect(controller.isVisible()).toBe(false);
+
+      // Toggle to show
+      controller.toggle();
+      expect(controller.isVisible()).toBe(true);
+
+      // Toggle to hide
+      controller.toggle();
+      expect(controller.isVisible()).toBe(false);
+
+      // Toggle to show again
+      controller.toggle();
+      expect(controller.isVisible()).toBe(true);
+    });
+  });
+
+  describe('show()', () => {
+    it('should show dashboard overlay', () => {
+      // Act
+      controller.show();
+
+      // Assert
+      expect(controller.isVisible()).toBe(true);
+      expect(mockCtx.ui.custom).toHaveBeenCalledWith(
+        expect.objectContaining({
+          overlay: true,
+          anchor: 'right-center',
+          widthPercent: 50,
+          heightPercent: 80,
+        })
+      );
+    });
+
+    it('should be idempotent (no-op if already visible)', () => {
+      // Arrange: show dashboard
+      controller.show();
+      expect(mockCtx.ui.custom).toHaveBeenCalledTimes(1);
+
+      // Act: call show again
+      controller.show();
+
+      // Assert: should not create another overlay
+      expect(mockCtx.ui.custom).toHaveBeenCalledTimes(1);
+      expect(controller.isVisible()).toBe(true);
+    });
+
+    it('should handle missing ctx gracefully', () => {
+      // Arrange: controller without context
+      const controllerNoCtx = new DashboardController({
+        stateManager: mockStateManager,
+      });
+
+      // Act & Assert: should not throw
+      expect(() => {
+        controllerNoCtx.show();
+      }).not.toThrow();
+      expect(controllerNoCtx.isVisible()).toBe(false);
+    });
+
+    it('should pass DashboardComponent to ctx.ui.custom', () => {
+      // Act
+      controller.show();
+
+      // Assert
+      const callArgs = mockCtx.ui.custom.mock.calls[0][0];
+      expect(callArgs.component).toBeDefined();
+      expect(callArgs.component.render).toBeInstanceOf(Function);
+    });
+  });
+
+  describe('hide()', () => {
+    it('should hide dashboard overlay', () => {
+      // Arrange: show dashboard first
+      controller.show();
+      const handle = mockCtx.ui.custom.mock.results[0].value;
+      expect(controller.isVisible()).toBe(true);
+
+      // Act
+      controller.hide();
+
+      // Assert
+      expect(controller.isVisible()).toBe(false);
+      expect(handle.close).toHaveBeenCalled();
+    });
+
+    it('should be idempotent (no-op if already hidden)', () => {
+      // Arrange: dashboard is already hidden
+      expect(controller.isVisible()).toBe(false);
+
+      // Act & Assert: should not throw
+      expect(() => {
+        controller.hide();
+      }).not.toThrow();
+      expect(controller.isVisible()).toBe(false);
+    });
+
+    it('should clean up dashboard handle', () => {
+      // Arrange
+      controller.show();
+      const handle = mockCtx.ui.custom.mock.results[0].value;
+
+      // Act
+      controller.hide();
+
+      // Assert: handle was cleaned up
+      expect(handle.close).toHaveBeenCalled();
+    });
+
+    it('should handle close errors gracefully', () => {
+      // Arrange: show dashboard with handle that throws on close
+      mockCtx.ui.custom.mockReturnValue({
+        close: jest.fn(() => {
+          throw new Error('Close failed');
+        }),
+      });
+      controller.show();
+
+      // Act & Assert: should not throw
+      expect(() => {
+        controller.hide();
+      }).not.toThrow();
+      expect(controller.isVisible()).toBe(false);
+    });
+  });
+
+  describe('isVisible()', () => {
+    it('should return false initially', () => {
+      expect(controller.isVisible()).toBe(false);
+    });
+
+    it('should return true after show()', () => {
+      controller.show();
+      expect(controller.isVisible()).toBe(true);
+    });
+
+    it('should return false after hide()', () => {
+      controller.show();
+      controller.hide();
+      expect(controller.isVisible()).toBe(false);
+    });
+
+    it('should reflect current state after toggle()', () => {
+      expect(controller.isVisible()).toBe(false);
+      
+      controller.toggle();
+      expect(controller.isVisible()).toBe(true);
+      
+      controller.toggle();
+      expect(controller.isVisible()).toBe(false);
+    });
+  });
+
+  describe('getFooterStatus()', () => {
+    it('should return empty string when dashboard is visible', () => {
+      // Arrange
+      controller.show();
+
+      // Act
+      const status = controller.getFooterStatus();
+
+      // Assert
+      expect(status).toBe('');
+    });
+
+    it('should return "📊 No agents" when no agents are tracked', () => {
+      // Arrange: empty agent list
+      (mockStateManager.getAllAgents as jest.Mock).mockReturnValue([]);
+
+      // Act
+      const status = controller.getFooterStatus();
+
+      // Assert
+      expect(status).toBe('📊 No agents');
+    });
+
+    it('should return "📊 1 agent" when one agent is tracked', () => {
+      // Arrange: one agent
+      const agents = [createMockAgent('agent-1', 'test')];
+      (mockStateManager.getAllAgents as jest.Mock).mockReturnValue(agents);
+
+      // Act
+      const status = controller.getFooterStatus();
+
+      // Assert
+      expect(status).toBe('📊 1 agent');
+    });
+
+    it('should return "📊 N agents" when multiple agents are tracked', () => {
+      // Arrange: multiple agents
+      const agents = [
+        createMockAgent('agent-1', 'first'),
+        createMockAgent('agent-2', 'second'),
+        createMockAgent('agent-3', 'third'),
+      ];
+      (mockStateManager.getAllAgents as jest.Mock).mockReturnValue(agents);
+
+      // Act
+      const status = controller.getFooterStatus();
+
+      // Assert
+      expect(status).toBe('📊 3 agents');
+    });
+
+    it('should update when agent count changes', () => {
+      // Arrange: start with 2 agents
+      let agents = [
+        createMockAgent('agent-1', 'first'),
+        createMockAgent('agent-2', 'second'),
+      ];
+      (mockStateManager.getAllAgents as jest.Mock).mockReturnValue(agents);
+
+      // Act & Assert: initial count
+      expect(controller.getFooterStatus()).toBe('📊 2 agents');
+
+      // Arrange: add agent
+      agents = [...agents, createMockAgent('agent-3', 'third')];
+      (mockStateManager.getAllAgents as jest.Mock).mockReturnValue(agents);
+
+      // Act & Assert: updated count
+      expect(controller.getFooterStatus()).toBe('📊 3 agents');
+    });
+  });
+
+  describe('registerStatsCommand()', () => {
+    it('should register /stats command with Pi', () => {
+      // Act
+      const cleanup = controller.registerStatsCommand(mockCtx);
+
+      // Assert
+      expect(mockCtx.commands.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'stats',
+          description: expect.any(String),
+          execute: expect.any(Function),
+        })
+      );
+      expect(cleanup).toBeInstanceOf(Function);
+    });
+
+    it('should toggle dashboard when command is executed', () => {
+      // Arrange: register command
+      controller.registerStatsCommand(mockCtx);
+      const commandConfig = mockCtx.commands.register.mock.calls[0][0];
+      const executeFunc = commandConfig.execute;
+
+      // Act: execute command
+      executeFunc();
+
+      // Assert: dashboard toggled to visible
+      expect(controller.isVisible()).toBe(true);
+    });
+
+    it('should return cleanup function that unregisters command', () => {
+      // Arrange
+      const cleanup = controller.registerStatsCommand(mockCtx);
+
+      // Act
+      cleanup();
+
+      // Assert
+      expect(mockCtx.commands.unregister).toHaveBeenCalledWith('cmd-id');
+    });
+
+    it('should handle missing commands API gracefully', () => {
+      // Arrange: context without commands API
+      const badCtx = {};
+
+      // Act & Assert: should not throw
+      expect(() => {
+        const cleanup = controller.registerStatsCommand(badCtx);
+        expect(cleanup).toBeInstanceOf(Function);
+      }).not.toThrow();
+    });
+  });
+
+  describe('registerKeyboardShortcut()', () => {
+    it('should register Ctrl+Shift+S shortcut with Pi', () => {
+      // Act
+      const cleanup = controller.registerKeyboardShortcut(mockCtx);
+
+      // Assert
+      expect(mockCtx.shortcuts.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: 'Ctrl+Shift+S',
+          description: expect.any(String),
+          action: expect.any(Function),
+        })
+      );
+      expect(cleanup).toBeInstanceOf(Function);
+    });
+
+    it('should toggle dashboard when shortcut is pressed', () => {
+      // Arrange: register shortcut
+      controller.registerKeyboardShortcut(mockCtx);
+      const shortcutConfig = mockCtx.shortcuts.register.mock.calls[0][0];
+      const actionFunc = shortcutConfig.action;
+
+      // Act: trigger shortcut
+      actionFunc();
+
+      // Assert: dashboard toggled to visible
+      expect(controller.isVisible()).toBe(true);
+    });
+
+    it('should return cleanup function that unregisters shortcut', () => {
+      // Arrange
+      const cleanup = controller.registerKeyboardShortcut(mockCtx);
+
+      // Act
+      cleanup();
+
+      // Assert
+      expect(mockCtx.shortcuts.unregister).toHaveBeenCalledWith('shortcut-id');
+    });
+
+    it('should handle missing shortcuts API gracefully', () => {
+      // Arrange: context without shortcuts API
+      const badCtx = {};
+
+      // Act & Assert: should not throw
+      expect(() => {
+        const cleanup = controller.registerKeyboardShortcut(badCtx);
+        expect(cleanup).toBeInstanceOf(Function);
+      }).not.toThrow();
+    });
+  });
+
+  describe('State Persistence', () => {
+    it('should preserve state manager data across show/hide cycles', () => {
+      // Arrange: add agents to state
+      const agents = [createMockAgent('agent-1', 'test')];
+      (mockStateManager.getAllAgents as jest.Mock).mockReturnValue(agents);
+
+      // Act: show, hide, show again
+      controller.show();
+      expect(controller.getFooterStatus()).toBe(''); // Visible, no footer
+      
+      controller.hide();
+      expect(controller.getFooterStatus()).toBe('📊 1 agent'); // Hidden, shows count
+      
+      controller.show();
+      expect(controller.getFooterStatus()).toBe(''); // Visible again
+
+      // Assert: state manager still has agents
+      expect(mockStateManager.getAllAgents).toHaveBeenCalled();
+    });
+
+    it('should maintain visibility state throughout session', () => {
+      // Act: series of operations
+      expect(controller.isVisible()).toBe(false);
+      
+      controller.show();
+      expect(controller.isVisible()).toBe(true);
+      
+      controller.hide();
+      expect(controller.isVisible()).toBe(false);
+      
+      controller.toggle();
+      expect(controller.isVisible()).toBe(true);
+      
+      controller.toggle();
+      expect(controller.isVisible()).toBe(false);
+
+      // Assert: state is consistent
+      expect(controller.isVisible()).toBe(false);
+    });
+  });
+
+  describe('dispose()', () => {
+    it('should hide dashboard and clean up resources', () => {
+      // Arrange: show dashboard
+      controller.show();
+      expect(controller.isVisible()).toBe(true);
+
+      // Act
+      controller.dispose();
+
+      // Assert
+      expect(controller.isVisible()).toBe(false);
+    });
+
+    it('should clear context reference', () => {
+      // Act
+      controller.dispose();
+
+      // Assert: attempting to show should fail gracefully
+      controller.show();
+      expect(controller.isVisible()).toBe(false);
+    });
+  });
+
+  describe('setContext()', () => {
+    it('should allow setting context after construction', () => {
+      // Arrange: controller without context
+      const controllerNoCtx = new DashboardController({
+        stateManager: mockStateManager,
+      });
+
+      // Act: set context
+      controllerNoCtx.setContext(mockCtx);
+      controllerNoCtx.show();
+
+      // Assert: dashboard can now be shown
+      expect(controllerNoCtx.isVisible()).toBe(true);
+      expect(mockCtx.ui.custom).toHaveBeenCalled();
+    });
+  });
+});
+
+describe('DashboardComponent - Internal Keyboard Shortcuts', () => {
   let dashboard: DashboardComponent;
   let mockStateManager: StateManager;
   let mockController: ReturnType<typeof createMockController>;
