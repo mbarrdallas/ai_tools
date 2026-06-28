@@ -1,94 +1,78 @@
 /**
  * Stats Dashboard TUI - Pi Extension Entry Point
  *
- * Wires together all components: StateManager, NotificationManager,
- * DashboardController, event handlers, commands, and keyboard shortcuts.
+ * Real-time monitoring dashboard for Pi sessions. Tracks agent metrics,
+ * tool history, and conversation flow in a TUI overlay.
  *
- * This is the main extension file that Pi loads on session start.
+ * Usage:
+ *   /stats   - toggle dashboard
  */
 
-import { StateManager } from './shared/state/state-manager';
-import { NotificationManager } from './shared/state/notification-manager';
-import { DashboardController } from './shared/ui/controller';
-import { registerEventHandlers, setDashboardHandle } from './shared/handlers/events';
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { StateManager } from "./shared/state/state-manager";
+import { NotificationManager } from "./shared/state/notification-manager";
+import { DashboardController } from "./shared/ui/controller";
+import {
+  setManagers,
+  setDashboardHandle,
+  registerEventHandlers,
+} from "./shared/handlers/events";
 
-/** Keyboard shortcut for toggling the dashboard */
-const SHORTCUT = 'ctrl+shift+s';
+export default function (pi: ExtensionAPI) {
+  // Module-level state so all handlers share the same instances
+  const stateManager = new StateManager();
+  let controller: DashboardController | null = null;
 
-/** Command name for toggling the dashboard */
-const COMMAND = '/stats';
+  // Register all Pi event handlers (agent_start, agent_end, message_end, etc.)
+  registerEventHandlers(pi as any, stateManager, null as any);
 
-/**
- * Stats Dashboard TUI Extension
- *
- * Provides real-time monitoring of agent metrics, tool history,
- * and conversation view in a terminal UI overlay.
- */
-export default {
-  name: 'stats-dashboard-tui',
-  version: '1.0.0',
-  description: 'Real-time agent stats dashboard in a TUI overlay',
+  // Context-dependent setup: runs once when session is ready
+  pi.on("session_start", async (_event, ctx) => {
+    const notificationManager = new NotificationManager(
+      stateManager,
+      ctx as any
+    );
+    controller = new DashboardController({ stateManager, ctx: ctx as any });
 
-  /**
-   * Called by Pi when the extension is loaded at session start.
-   * Initializes all managers, registers event handlers, command, and shortcut.
-   *
-   * @param pi - Pi extension API
-   * @param ctx - Pi session context
-   */
-  async load(pi: any, ctx: any) {
-    // 1. Initialize managers
-    const stateManager = new StateManager();
-    const notificationManager = new NotificationManager(ctx);
-    const controller = new DashboardController({ stateManager, ctx });
+    // Inject notification manager into event handlers
+    setManagers(stateManager, notificationManager);
 
-    // 2. Register all Pi event handlers (agent lifecycle, metrics, tools, etc.)
-    registerEventHandlers(pi, stateManager, notificationManager);
-
-    // 3. Wire dashboard handle so event handlers can trigger re-renders
+    // Wire re-render handle
     setDashboardHandle({
-      requestRender: () => controller.requestRender(),
-      close: () => controller.hide(),
+      requestRender: () => controller?.requestRender(),
+      close: () => controller?.hide(),
     });
 
-    // 4. Register /stats command
-    const unregisterCommand = pi.commands?.register(COMMAND, {
-      description: 'Toggle the stats dashboard overlay',
-      handler: () => controller.toggle(),
-    });
-
-    // 5. Register Ctrl+Shift+S keyboard shortcut
-    const unregisterShortcut = pi.shortcuts?.register(SHORTCUT, {
-      description: 'Toggle stats dashboard',
-      handler: () => controller.toggle(),
-    });
-
-    // 6. Set footer status when dashboard is closed
+    // Footer status
     const updateFooter = () => {
-      if (!controller.isVisible()) {
-        const status = controller.getFooterStatus();
-        ctx.ui?.setStatus?.('stats-dashboard', status);
+      if (controller?.isVisible()) {
+        ctx.ui.setStatus("stats", undefined);
       } else {
-        ctx.ui?.setStatus?.('stats-dashboard', undefined);
+        ctx.ui.setStatus("stats", controller?.getFooterStatus() ?? "📊 0 agents");
       }
     };
-
-    // Update footer on visibility change
     controller.onVisibilityChange(updateFooter);
-
-    // Initial footer update
     updateFooter();
+  });
 
-    // 7. Return cleanup function called on session shutdown
-    return {
-      dispose() {
-        unregisterCommand?.();
-        unregisterShortcut?.();
-        setDashboardHandle(null);
-        controller.dispose();
-        stateManager.reset();
-        ctx.ui?.setStatus?.('stats-dashboard', undefined);
-      },
-    };
-  },
-};
+  // Cleanup on shutdown
+  pi.on("session_shutdown", async (_event, ctx) => {
+    setDashboardHandle(null);
+    controller?.dispose();
+    controller = null;
+    stateManager.reset();
+    ctx.ui.setStatus("stats", undefined);
+  });
+
+  // Register /stats command to toggle dashboard
+  pi.registerCommand("stats", {
+    description: "Toggle the stats dashboard overlay",
+    handler: async (_args, ctx) => {
+      if (!controller) {
+        ctx.ui.notify("Stats dashboard not ready yet", "warning");
+        return;
+      }
+      controller.toggle();
+    },
+  });
+}
